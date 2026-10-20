@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VMware Workstation 界面中英对照速查表</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#ffffff; --ink:#1f2329; --sub:#5b6472;
+    --line:#e3e6eb; --accent:#2f6fed; --accent-bg:#eef3ff;
+    --warn:#b54708; --warn-bg:#fff5ec; --ok:#0f7b3f; --ok-bg:#eefaf2;
+    --key:#7a3fd1; --key-bg:#f4eefe;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; padding:28px 20px 60px; background:var(--bg); color:var(--ink);
+    font:15px/1.75 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
+  }
+  .wrap{max-width:1000px;margin:0 auto}
+  header{background:linear-gradient(135deg,#2f6fed,#1c4fc0);color:#fff;border-radius:14px;padding:24px 26px}
+  header h1{margin:0 0 6px;font-size:22px;letter-spacing:.5px}
+  header p{margin:4px 0;font-size:13.5px;opacity:.92}
+  .badge{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);
+    border-radius:20px;padding:2px 11px;font-size:12.5px;margin-right:6px}
+  h2{font-size:17px;margin:30px 0 12px;padding-left:11px;border-left:4px solid var(--accent)}
+  h3{font-size:14.5px;margin:18px 0 8px;color:var(--sub)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0}
+  table{width:100%;border-collapse:collapse;font-size:14px;margin:4px 0}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:#fafbfc;font-weight:600;color:var(--sub);font-size:13px}
+  tr:last-child td{border-bottom:none}
+  code{background:#f1f3f6;border:1px solid var(--line);border-radius:5px;padding:1px 6px;
+    font:13px/1.5 Consolas,Monaco,monospace;color:#b5305e}
+  .en{font-family:Consolas,Monaco,monospace;color:#1f2329;font-weight:600}
+  .tip{background:var(--ok-bg);border-left:4px solid var(--ok);border-radius:8px;padding:10px 14px;margin:10px 0;font-size:14px}
+  .warn{background:var(--warn-bg);border-left:4px solid var(--warn);border-radius:8px;padding:10px 14px;margin:10px 0;font-size:14px}
+  .key{background:var(--key-bg);border-left:4px solid var(--key);border-radius:8px;padding:10px 14px;margin:10px 0;font-size:14px}
+  .note{background:var(--accent-bg);border-left:4px solid var(--accent);border-radius:8px;padding:10px 14px;margin:10px 0;font-size:14px}
+  ol,ul{padding-left:22px;margin:8px 0}
+  li{margin:4px 0}
+  .step{background:#fafbfc;border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:10px 0}
+  .step b{color:var(--accent)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media (max-width:760px){.grid2{grid-template-columns:1fr}}
+  .muted{color:var(--sub);font-size:13px}
+  a{color:var(--accent)}
+  footer{margin-top:34px;color:var(--sub);font-size:13px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>VMware Workstation 界面中英对照速查表</h1>
+  <p><span class="badge">版本 26.0.0 build-25388281</span><span class="badge">官方无中文界面</span><span class="badge">可打印</span></p>
+  <p>本表解决一件事：<b>菜单看不懂，但照样能把虚拟机建出来、管起来。</b> 新建虚拟机向导那一段（第 3 节）是重点。</p>
+</header>
+
+<div class="warn">
+  <b>先说结论：这个版本汉化不了（官方层面）。</b><br>
+  你的 <code>D:\VMware\messages\</code> 里只有 <code>es</code>（西）、<code>fr</code>（法）、<code>ja</code>（日）三种语言，<b>没有 <code>zh_CN</code></b>。
+  VMware 官方中文最后停在 <b>17.6.4</b>，之后的 25H2 / 26.0 只保留英/法/西/日。<br>
+  所以只能"换回旧版"或"外挂旧版语言包"——两条路的做法与风险见 <a href="#hanhua">第 7 节</a>。
+</div>
+
+<div class="note">
+  <b>怎么用这份表：</b>把本页在浏览器里打开（双击即可），拖到 VMware 窗口旁边，两边对照着操作。按 <code>Ctrl+P</code> 可以打印贴桌上。
+</div>
+
+<h2>1 · 主菜单栏（最上面一行）</h2>
+<table>
+  <tr><th style="width:110px">英文</th><th style="width:90px">中文</th><th>里面常用项</th></tr>
+  <tr><td class="en">File</td><td>文件</td><td><b>New Virtual Machine</b> 新建虚拟机 ｜ <b>Open</b> 打开 ｜ <b>Close Tab</b> 关闭选项卡 ｜ <b>Export to OVF</b> 导出为 OVF ｜ <b>Map Virtual Disks</b> 映射虚拟磁盘 ｜ <b>Preferences</b> 首选项 ｜ <b>Exit</b> 退出</td></tr>
+  <tr><td class="en">Edit</td><td>编辑</td><td><b>Preferences</b> 首选项 ｜ <b>Virtual Network Editor</b> 虚拟网络编辑器（改 NAT / 网段就在这）</td></tr>
+  <tr><td class="en">View</td><td>查看</td><td><b>Toolbar</b> 工具栏 ｜ <b>Status Bar</b> 状态栏 ｜ <b>Sidebar</b> 侧边栏 ｜ <b>Full Screen</b> 全屏</td></tr>
+  <tr><td class="en">VM</td><td>虚拟机</td><td><b>Power</b> 电源 ｜ <b>Settings…</b> 设置 ｜ <b>Snapshot</b> 快照 ｜ <b>Snapshot Manager</b> 快照管理器 ｜ <b>Install VMware Tools</b> 安装 VMware Tools ｜ <b>Removable Devices</b> 可移动设备（U 盘、光驱挂载在这）</td></tr>
+  <tr><td class="en">Tabs</td><td>选项卡</td><td><b>New Tab</b> 新建选项卡（同时开多台虚拟机）</td></tr>
+  <tr><td class="en">Help</td><td>帮助</td><td><b>Help Topics</b> 帮助主题 ｜ <b>About VMware Workstation</b> 关于（看版本号）</td></tr>
+</table>
+
+<h2>2 · 工具栏图标按钮（菜单下面一排）</h2>
+<table>
+  <tr><th style="width:190px">英文悬停提示</th><th style="width:90px">中文</th><th>作用</th></tr>
+  <tr><td class="en">Home</td><td>主页</td><td>回到虚拟机列表</td></tr>
+  <tr><td class="en">Power On this virtual machine</td><td>开机</td><td>启动这台虚拟机（等于绿三角）</td></tr>
+  <tr><td class="en">Power Off this virtual machine</td><td>关机</td><td>断电式关机（危险，相当于拔电源）</td></tr>
+  <tr><td class="en">Suspend this virtual machine</td><td>挂起</td><td>暂停并保存到磁盘（= 生成 .vmss/.vmem 文件）</td></tr>
+  <tr><td class="en">Restart this virtual machine</td><td>重启</td><td>重置式重启</td></tr>
+  <tr><td class="en">Shut Down Guest</td><td>关闭客户机</td><td><b>优雅关机</b>（发信号让系统自己关，推荐）</td></tr>
+  <tr><td class="en">Take Snapshot / Snapshot Manager</td><td>拍快照 / 快照管理器</td><td>存档与回档，装系统前拍一张最保险</td></tr>
+</table>
+<div class="tip"><b>区分"关机"和"关客户机"：</b><code>Power Off</code> 是拔电源，可能损坏虚拟磁盘；<code>Shut Down Guest</code> 才是正常的关机。</div>
+
+<h2>3 · ★ 新建虚拟机向导（重点：你正要做的这一步）</h2>
+
+<div class="warn">
+  <b>最关键的一个岔路口</b>——向导第一屏问你"安装来源"（Install from），三个选项里：
+  <ol style="margin:6px 0">
+    <li><span class="en">Installer disc</span> 物理光驱</li>
+    <li><span class="en">Installer disc image file (iso)</span> ← <b>选它会触发"简易安装"，会强行跳过 Ubuntu 安装向导，用户名被定成 ubuntu，这就是你前面几次失败的原因</b></li>
+    <li><span class="en">I will install the operating system later</span> ← <b>★ 选这个！</b>（"稍后安装操作系统"）它不让 VMware 插手，你就能走完整向导、自己填用户名</li>
+  </ol>
+</div>
+
+<div class="step">
+  <b>第 1 屏 Welcome</b><br>
+  <span class="en">Typical (recommended)</span> 典型（推荐） ｜ <span class="en">Custom (advanced)</span> 自定义（高级）<br>
+  <span class="en">Install from:</span> 安装来源 —— <b>选下面第三项</b>：<br>
+  <code>I will install the operating system later.</code> 　→ 稍后安装操作系统
+</div>
+
+<div class="step">
+  <b>第 2 屏 Select a Guest Operating System</b>（选择客户机操作系统）<br>
+  <span class="en">Guest operating system:</span> 客户机操作系统 → 选 <b>Linux</b><br>
+  <span class="en">Version:</span> 版本 → 选 <b>Ubuntu 64-bit</b>
+</div>
+
+<div class="step">
+  <b>第 3 屏 Name the Virtual Machine</b>（命名虚拟机）<br>
+  <span class="en">Virtual machine name:</span> 虚拟机名称 → 填 <code>lrh</code>（<span class="muted">只影响 VMware 里显示的名字</span>）<br>
+  <span class="en">Location:</span> 位置 → 想改存放目录点 <b>Browse…</b> 浏览
+</div>
+
+<div class="step">
+  <b>第 4 屏 Specify Disk Capacity</b>（指定磁盘容量）<br>
+  <span class="en">Maximum disk size (GB):</span> 最大磁盘大小 → <b>60</b><br>
+  <span class="en">Store virtual disk as a single file</span> 存为单个文件 ｜ <span class="en">Split virtual disk into multiple files</span> 拆分成多个文件（<span class="muted">默认即可，别改</span>）<br>
+  <span class="en">Allocate all disk space now</span> 立即分配所有磁盘空间 ← <b>不要勾</b>（勾了会马上占满 60GB）
+</div>
+
+<div class="step">
+  <b>第 5 屏 Ready to Create</b>（准备创建）<br>
+  点 <b><span class="en">Customize Hardware…</span></b>（自定义硬件）可以调内存/CPU，也可以等下再调。<br>
+  <span class="en">Power on this virtual machine after creation</span> 创建后打开电源 ← 先不勾，因为还没挂 ISO。<br>
+  然后点 <b>Finish</b> 完成。
+</div>
+
+<h3>创建后：手动挂 ISO</h3>
+<div class="step">
+  <b><span class="en">VM → Settings…</span></b>（虚拟机 → 设置）→ 左侧硬件列表点 <b><span class="en">CD/DVD (SATA)</span></b>：
+  <ul>
+    <li>右侧选 <b><span class="en">Use ISO image file:</span></b> 使用 ISO 映像文件 → <b>Browse…</b> 选 <code>ubuntu-22.04.5-desktop-amd64.iso</code></li>
+    <li>勾上 <b><span class="en">Connect at power on</span></b> 启动时连接 ← <b>必须勾</b></li>
+  </ul>
+  然后开机，就会进 Ubuntu 图形安装向导。
+</div>
+
+<h3>硬件设置对话框（Customize Hardware / Settings）左侧列表</h3>
+<table>
+  <tr><th style="width:190px">英文</th><th style="width:90px">中文</th><th>说明</th></tr>
+  <tr><td class="en">Memory</td><td>内存</td><td>给虚拟机分内存（你在 4GB 以内，别超物理内存）</td></tr>
+  <tr><td class="en">Processors</td><td>处理器</td><td>Number of cores per processor 每处理器核心数</td></tr>
+  <tr><td class="en">New CD/DVD (SATA)</td><td>光驱</td><td>挂 ISO 就在这</td></tr>
+  <tr><td class="en">Network Adapter</td><td>网络适配器</td><td>下面单独讲</td></tr>
+  <tr><td class="en">USB Controller</td><td>USB 控制器</td><td>默认</td></tr>
+  <tr><td class="en">Sound Card</td><td>声卡</td><td>不需要可移除</td></tr>
+  <tr><td class="en">Display</td><td>显示</td><td>Accelerate 3D graphics 加速 3D 图形</td></tr>
+</table>
+
+<h3>网络模式（Network Adapter 里的三个选项）</h3>
+<table>
+  <tr><th style="width:190px">英文</th><th style="width:80px">中文</th><th>含义</th></tr>
+  <tr><td class="en">Bridged</td><td>桥接</td><td>直接接进你的物理网络，<b>会拿到局域网 IP</b>（你的集群三台用的就是这个，网段 192.168.87.x）</td></tr>
+  <tr><td class="en">NAT</td><td>网络地址转换</td><td>通过宿主机上网，外网访问不到它，最省心</td></tr>
+  <tr><td class="en">Host-only</td><td>仅主机</td><td>只能和宿主机通信，不能上网</td></tr>
+</table>
+
+<h2>4 · 虚拟机「设置」里的两个大页签</h2>
+<table>
+  <tr><th style="width:130px">英文</th><th style="width:80px">中文</th><th>常用项</th></tr>
+  <tr><td class="en">Hardware</td><td>硬件</td><td>内存 / 处理器 / 光驱 / 网卡 / 显示 …（见上表）</td></tr>
+  <tr><td class="en">Options</td><td>选项</td><td><span class="en">Shared Folders</span> 共享文件夹 ｜ <span class="en">Snapshots</span> 快照 ｜ <span class="en">AutoProtect</span> 自动保护 ｜ <span class="en">VMware Tools</span></td></tr>
+</table>
+
+<h2>5 · 常见英文提示 / 弹窗</h2>
+<table>
+  <tr><th style="width:330px">英文原文</th><th>中文 &amp; 该怎么办</th></tr>
+  <tr><td class="en">This virtual machine might have been moved or copied.</td>
+      <td>「这台虚拟机可能被移动或复制过」→ 选 <b>I Moved It</b>（我移动了它）<span class="muted">（选 I Copied It 会重新生成网卡 MAC 和 UUID）</span></td></tr>
+  <tr><td class="en">Cannot connect to the virtual machine.</td>
+      <td>「无法连接到该虚拟机」→ 通常是有另一个 VMware 进程占着，或文件被锁</td></tr>
+  <tr><td class="en">The virtual machine is busy.</td>
+      <td>「虚拟机正忙」→ 等它跑完，或在确认无重要的操作时用 <code>Power Off</code></td></tr>
+  <tr><td class="en">Insuficient permission to access file / Access is denied</td>
+      <td>「访问被拒绝」→ 用<b>管理员身份运行</b> VMware，或检查文件是否只读</td></tr>
+  <tr><td class="en">No 3D support is available from the host.</td>
+      <td>「宿主机不支持 3D」→ 无害，虚拟机设置里关掉 <b>Accelerate 3D graphics</b> 即可</td></tr>
+  <tr><td class="en">VMware Tools is not installed / out of date</td>
+      <td>「VMware Tools 未安装 / 过旧」→ 不影响使用，装它能让屏幕自适应、剪贴板互通</td></tr>
+  <tr><td class="en">The disk is full / low disk space</td>
+      <td>「磁盘已满」→ 要么给虚拟磁盘扩容，要么清理宿主磁盘</td></tr>
+  <tr><td class="en">Are you sure you want to …?</td>
+      <td>「确定要……吗？」→ <b>Yes</b> 是 / <b>No</b> 否</td></tr>
+  <tr><td class="en">Continue / Cancel / OK / Apply</td>
+      <td>继续 / 取消 / 确定 / 应用</td></tr>
+</table>
+
+<h2>6 · Ubuntu 安装向导（进去之后的那几屏）</h2>
+<table>
+  <tr><th style="width:250px">英文</th><th>中文 &amp; 怎么选</th></tr>
+  <tr><td class="en">Try Ubuntu / Install Ubuntu</td><td>试用 / 安装 → 选 <b>Install Ubuntu</b>（安装 Ubuntu）</td></tr>
+  <tr><td class="en">Keyboard layout</td><td>键盘布局 → <b>Chinese</b> 或 English 都行</td></tr>
+  <tr><td class="en">Updates and other software</td><td>更新与软件 → 选 <b>Normal installation</b>（正常安装）；联网不快就取消勾 <b>Download updates while installing</b></td></tr>
+  <tr><td class="en">Installation type</td><td>安装类型 → 选 <b>Erase disk and install Ubuntu</b>（抹除磁盘并安装）<span class="muted">——这里抹的是虚拟机的那块 60GB 虚拟硬盘，不动你的真机</span></td></tr>
+  <tr><td class="en">Where are you?</td><td>你在哪 → 时区，选 <b>Shanghai</b></td></tr>
+  <tr><td class="en">Who are you?</td><td><b>★ 决定终端提示符的一页，重点看下面</b></td></tr>
+</table>
+
+<div class="key">
+  <b>★ "Who are you?" 这一页，四个字段的对应关系：</b>
+  <table style="margin-top:8px">
+    <tr><th style="width:230px">字段</th><th style="width:190px">填什么</th><th>决定终端里的哪一部分</th></tr>
+    <tr><td class="en">Your name</td><td><code>lrh</code></td><td>只是<b>显示名</b>，怎么填都不影响登录</td></tr>
+    <tr><td class="en">Your computer's name</td><td><code>lrh</code></td><td>主机名 → 提示符 <b>@ 后面</b>那个</td></tr>
+    <tr><td class="en">Pick a username</td><td><code>lrh</code></td><td>登录名 → 提示符 <b>@ 前面</b>那个 ★★★</td></tr>
+    <tr><td class="en">Choose a password / Confirm</td><td>自设</td><td>登录密码</td></tr>
+  </table>
+  <p style="margin:10px 0 0"><b>最容易错的地方：</b>很多人只改了最上面的 <code>Your name</code>，没改下面的 <code>Pick a username</code>。<br>
+  只改 <code>Your name</code> → 终端还是 <code>ubuntu@ubuntu</code>；<b>两处都改成 lrh</b> → 终端才是 <code>lrh@lrh</code>。</p>
+</div>
+
+<h2 id="hanhua">7 · 汉化的两条路（以及为什么我建议你现在先别急）</h2>
+
+<div class="card">
+  <h3 style="margin-top:0">路 A：外挂 17.6.4 的语言包（保留当前 26.0 版本）</h3>
+  <p class="muted">原理：VMware 的界面文字就是 <code>messages\&lt;语言&gt;\</code> 这个目录里的 3 个文件，程序启动时按配置去加载。你现在的目录里已有 <code>es / fr / ja</code>，证明这个机制是活的 —— 缺的只是一个 <code>zh_CN</code> 目录。</p>
+  <ol>
+    <li>搞到 <b>VMware Workstation Pro 17.6.4</b> 的安装包（<b>官方中文的最后一版</b>）。
+        <span class="muted">官方下载要登录 Broadcom 账号（免费注册）：support.broadcom.com → VMware Workstation Pro → 选 17.6.4。</span></li>
+    <li>装到别处或直接解包，取出里面的 <code>messages\zh_CN\</code> 文件夹（含 <code>vmui-zh_CN.dll</code>、<code>vmware.vmsg</code> 等 3 个文件）。</li>
+    <li>把它整体复制到 <code>D:\VMware\messages\zh_CN\</code>（需要管理员权限）。</li>
+    <li>编辑 <code>C:\Users\lz\AppData\Roaming\VMware\preferences.ini</code>，在<b>最后一行</b>加：
+        <pre style="margin:6px 0">pref.locale = "zh_CN"</pre></li>
+    <li>完全退出 VMware 再重开 → 界面变中文。</li>
+  </ol>
+  <div class="warn">
+    <b>风险（必须知道）：</b>那 3 个文件是 <b>17.6.4 的版本</b>，装到 26.0 的程序里，可能出现"部分菜单还是英文"或个别对话框乱码。<br>
+    <b>但它完全可逆</b>：只要删掉 <code>messages\zh_CN\</code> 目录 + 删掉那行配置，就回到原样。原有文件一个都不动。
+  </div>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0">路 B：整机降级到 17.6.4（官方原生中文）</h3>
+  <p>最"正"，但代价最大：<b>卸载 26.0 → 装 17.6.4</b>。</p>
+  <div class="warn">
+    <b>⚠️ 对你不适合，原因是集群：</b>你的项目集群三台虚拟机是<b>在用资产</b>，而新版创建的虚拟机硬件版本较高，<b>旧版 VMware 可能打不开</b>（会提示 hardware version 不支持）。
+    为了一个界面语言，去冒"集群打不开"的风险，不划算。
+  </div>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0">路 C（社区汉化包）—— 我不建议</h3>
+  <p>网上那些"一键汉化包"多数不只是文字文件，而是<b>替换/额外注入 DLL</b>。别人往里改了什么都无法验证，属于典型的杀软高风险项。<br>
+  如果一定要用，<b>至少只取纯 <code>zh_CN</code> 语言文件夹</b>，不要运行任何 <code>.exe</code>/<code>.bat</code> 安装器。</p>
+</div>
+
+<div class="tip">
+  <b>我的建议：</b>先用这份对照表把"新建虚拟机 + 装 Ubuntu"这个流程走完（你已经卡在这里两次了，流程本身不难，只是看不懂按钮）。<br>
+  等这套流程顺了，你要是还觉得英文界面别扭，我们再去搞路 A —— 那时你已经能分清"哪里是真需要中文"，而不是全面看不懂。
+</div>
+
+<footer>
+  VMware Workstation 26.0.0 build-25388281 · 语言目录实测 <code>D:\VMware\messages\ = es, fr, ja</code>（无 zh_CN）<br>
+  生成于 2026-10-05 · 用于 gmall 数仓项目环境练习
+</footer>
+
+</div>
+</body>
+</html>

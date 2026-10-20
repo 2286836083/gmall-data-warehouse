@@ -1,0 +1,59 @@
+SLF4J: Class path contains multiple SLF4J bindings.
+SLF4J: Found binding in [jar:file:/opt/hive/lib/log4j-slf4j-impl-2.17.1.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/opt/hadoop-3.3.6/share/hadoop/common/lib/slf4j-reload4j-1.7.36.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J: Actual binding is of type [org.apache.logging.slf4j.Log4jLoggerFactory]
+Connecting to jdbc:hive2://localhost:10000
+Connected to: Apache Hive (version 3.1.3)
+Driver: Hive JDBC (version 3.1.3)
+Transaction isolation: TRANSACTION_REPEATABLE_READ
+0: jdbc:hive2://localhost:10000> USE gmall;
+INFO  : Compiling command(queryId=hadoop_20260901132804_6285072d-254a-47dc-a6b2-33ad45836c18): USE gmall
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:null, properties:null)
+INFO  : Completed compiling command(queryId=hadoop_20260901132804_6285072d-254a-47dc-a6b2-33ad45836c18); Time taken: 0.038 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hadoop_20260901132804_6285072d-254a-47dc-a6b2-33ad45836c18): USE gmall
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hadoop_20260901132804_6285072d-254a-47dc-a6b2-33ad45836c18); Time taken: 0.006 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
+No rows affected (0.075 seconds)
+0: jdbc:hive2://localhost:10000> 
+0: jdbc:hive2://localhost:10000> SELECT 'dim_user' t, COUNT(*) c FROM dim_user;
+INFO  : Compiling command(queryId=hadoop_20260901132805_337371d7-8dde-47f2-9c6b-993ccb240620): SELECT 'dim_user' t, COUNT(*) c FROM dim_user
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:t, type:string, comment:null), FieldSchema(name:c, type:bigint, comment:null)], properties:null)
+INFO  : Completed compiling command(queryId=hadoop_20260901132805_337371d7-8dde-47f2-9c6b-993ccb240620); Time taken: 0.074 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hadoop_20260901132805_337371d7-8dde-47f2-9c6b-993ccb240620): SELECT 'dim_user' t, COUNT(*) c FROM dim_user
+INFO  : Completed executing command(queryId=hadoop_20260901132805_337371d7-8dde-47f2-9c6b-993ccb240620); Time taken: 0.0 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
++-----------+-------+
+|     t     |   c   |
++-----------+-------+
+| dim_user  | 1000  |
++-----------+-------+
+1 row selected (0.104 seconds)
+0: jdbc:hive2://localhost:10000> 
+0: jdbc:hive2://localhost:10000> SELECT 'dim_sku' t, COUNT(*) c FROM dim_sku;
+INFO  : Compiling command(queryId=hadoop_20260901132805_3ae857f5-2efa-490b-bf0f-0e8a44e98cb2): SELECT 'dim_sku' t, COUNT(*) c FROM dim_sku
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:t, type:string, comment:null), FieldSchema(name:c, type:bigint, comment:null)], properties:null)
+INFO  : Completed compiling command(queryId=hadoop_20260901132805_3ae857f5-2efa-490b-bf0f-0e8a44e98cb2); Time taken: 0.077 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hadoop_20260901132805_3ae857f5-2efa-490b-bf0f-0e8a44e98cb2): SELECT 'dim_sku' t, COUNT(*) c FROM dim_sku
+INFO  : Completed executing command(queryId=hadoop_20260901132805_3ae857f5-2efa-490b-bf0f-0e8a44e98cb2); Time taken: 0.0 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
++----------+------+
+|    t     |  c   |
++----------+------+
+| dim_sku  | 500  |
++----------+------+
+1 row selected (0.089 seconds)
+0: jdbc:hive2://localhost:10000> Closing: 0: jdbc:hive2://localhost:10000

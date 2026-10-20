@@ -1,0 +1,514 @@
+SLF4J: Class path contains multiple SLF4J bindings.
+SLF4J: Found binding in [jar:file:/opt/hive/lib/log4j-slf4j-impl-2.17.1.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/opt/hadoop-3.3.6/share/hadoop/common/lib/slf4j-reload4j-1.7.36.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J: Actual binding is of type [org.apache.logging.slf4j.Log4jLoggerFactory]
+Connecting to jdbc:hive2://localhost:10000
+Connected to: Apache Hive (version 3.1.3)
+Driver: Hive JDBC (version 3.1.3)
+Transaction isolation: TRANSACTION_REPEATABLE_READ
+0: jdbc:hive2://localhost:10000> USE gmall;
+INFO  : Compiling command(queryId=hadoop_20260901152531_4acf134a-e69d-4373-8f30-0ec1eddb25ce): USE gmall
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:null, properties:null)
+INFO  : Completed compiling command(queryId=hadoop_20260901152531_4acf134a-e69d-4373-8f30-0ec1eddb25ce); Time taken: 0.036 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hadoop_20260901152531_4acf134a-e69d-4373-8f30-0ec1eddb25ce): USE gmall
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hadoop_20260901152531_4acf134a-e69d-4373-8f30-0ec1eddb25ce); Time taken: 0.006 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
+No rows affected (0.071 seconds)
+0: jdbc:hive2://localhost:10000> SET hive.exec.mode.local.auto=false;
+No rows affected (0.003 seconds)
+0: jdbc:hive2://localhost:10000> 
+0: jdbc:hive2://localhost:10000> -- ========== 3.3 EXPLAIN 执行计划 ====== ====
+0: jdbc:hive2://localhost:10000> -- JOIN + GROUP BY 的执行计划
+0: jdbc:hive2://localhost:10000> EXPLAIN
+. . . . . . . . . . . . . . . .> SELECT s.category_id, COUNT(*) AS cnt 
+. . . . . . . . . . . . . . . .> FROM dwd_user_behavior_di b
+. . . . . . . . . . . . . . . .> JOIN dim_sku s ON b.sku_id = s.sku_id 
+. . . . . . . . . . . . . . . .> WHERE b.dt = '2026-08-24'
+. . . . . . . . . . . . . . . .> GROUP BY s.category_id;
+INFO  : Compiling command(queryId=hadoop_20260901152531_86e1c902-6737-49ef-9988-fe1aa9b6d022): EXPLAIN
+SELECT s.category_id, COUNT(*) AS cnt
+FROM dwd_user_behavior_di b
+JOIN dim_sku s ON b.sku_id = s.sku_id
+WHERE b.dt = '2026-08-24'
+GROUP BY s.category_id
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:Explain, type:string, comment:null)], properties:null)
+INFO  : Completed compiling command(queryId=hadoop_20260901152531_86e1c902-6737-49ef-9988-fe1aa9b6d022); Time taken: 0.166 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hadoop_20260901152531_86e1c902-6737-49ef-9988-fe1aa9b6d022): EXPLAIN
+SELECT s.category_id, COUNT(*) AS cnt
+FROM dwd_user_behavior_di b
+JOIN dim_sku s ON b.sku_id = s.sku_id
+WHERE b.dt = '2026-08-24'
+GROUP BY s.category_id
+INFO  : Starting task [Stage-6:EXPLAIN] in serial mode
+INFO  : Completed executing command(queryId=hadoop_20260901152531_86e1c902-6737-49ef-9988-fe1aa9b6d022); Time taken: 0.003 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
++----------------------------------------------------+
+|                      Explain                       |
++----------------------------------------------------+
+| STAGE DEPENDENCIES:                                |
+|   Stage-5 is a root stage                          |
+|   Stage-2 depends on stages: Stage-5               |
+|   Stage-0 depends on stages: Stage-2               |
+|                                                    |
+| STAGE PLANS:                                       |
+|   Stage: Stage-5                                   |
+|     Map Reduce Local Work                          |
+|       Alias -> Map Local Tables:                   |
+|         $hdt$_1:s                                  |
+|           Fetch Operator                           |
+|             limit: -1                              |
+|       Alias -> Map Local Operator Tree:            |
+|         $hdt$_1:s                                  |
+|           TableScan                                |
+|             alias: s                               |
+|             Statistics: Num rows: 500 Data size: 24673 Basic stats: COMPLETE Column stats: NONE |
+|             Filter Operator                        |
+|               predicate: sku_id is not null (type: boolean) |
+|               Statistics: Num rows: 500 Data size: 24673 Basic stats: COMPLETE Column stats: NONE |
+|               Select Operator                      |
+|                 expressions: sku_id (type: string), category_id (type: string) |
+|                 outputColumnNames: _col0, _col1    |
+|                 Statistics: Num rows: 500 Data size: 24673 Basic stats: COMPLETE Column stats: NONE |
+|                 HashTable Sink Operator            |
+|                   keys:                            |
+|                     0 _col0 (type: string)         |
+|                     1 _col0 (type: string)         |
+|                                                    |
+|   Stage: Stage-2                                   |
+|     Map Reduce                                     |
+|       Map Operator Tree:                           |
+|           TableScan                                |
+|             alias: b                               |
+|             Statistics: Num rows: 20163 Data size: 1553653 Basic stats: COMPLETE Column stats: NONE |
+|             Filter Operator                        |
+|               predicate: sku_id is not null (type: boolean) |
+|               Statistics: Num rows: 20163 Data size: 1553653 Basic stats: COMPLETE Column stats: NONE |
+|               Select Operator                      |
+|                 expressions: sku_id (type: string) |
+|                 outputColumnNames: _col0           |
+|                 Statistics: Num rows: 20163 Data size: 1553653 Basic stats: COMPLETE Column stats: NONE |
+|                 Map Join Operator                  |
+|                   condition map:                   |
+|                        Inner Join 0 to 1           |
+|                   keys:                            |
+|                     0 _col0 (type: string)         |
+|                     1 _col0 (type: string)         |
+|                   outputColumnNames: _col3         |
+|                   Statistics: Num rows: 22179 Data size: 1709018 Basic stats: COMPLETE Column stats: NONE |
+|                   Group By Operator                |
+|                     aggregations: count()          |
+|                     keys: _col3 (type: string)     |
+|                     mode: hash                     |
+|                     outputColumnNames: _col0, _col1 |
+|                     Statistics: Num rows: 22179 Data size: 1709018 Basic stats: COMPLETE Column stats: NONE |
+|                     Reduce Output Operator         |
+|                       key expressions: _col0 (type: string) |
+|                       sort order: +                |
+|                       Map-reduce partition columns: _col0 (type: string) |
+|                       Statistics: Num rows: 22179 Data size: 1709018 Basic stats: COMPLETE Column stats: NONE |
+|                       value expressions: _col1 (type: bigint) |
+|       Execution mode: vectorized                   |
+|       Local Work:                                  |
+|         Map Reduce Local Work                      |
+|       Reduce Operator Tree:                        |
+|         Group By Operator                          |
+|           aggregations: count(VALUE._col0)         |
+|           keys: KEY._col0 (type: string)           |
+|           mode: mergepartial                       |
+|           outputColumnNames: _col0, _col1          |
+|           Statistics: Num rows: 11089 Data size: 854470 Basic stats: COMPLETE Column stats: NONE |
+|           File Output Operator                     |
+|             compressed: false                      |
+|             Statistics: Num rows: 11089 Data size: 854470 Basic stats: COMPLETE Column stats: NONE |
+|             table:                                 |
+|                 input format: org.apache.hadoop.mapred.SequenceFileInputFormat |
+|                 output format: org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat |
+|                 serde: org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe |
+|                                                    |
+|   Stage: Stage-0                                   |
+|     Fetch Operator                                 |
+|       limit: -1                                    |
+|       Processor Tree:                              |
+|         ListSink                                   |
+|                                                    |
++----------------------------------------------------+
+86 rows selected (0.246 seconds)
+0: jdbc:hive2://localhost:10000> 
+0: jdbc:hive2://localhost:10000> -- ========== 3.2 分区裁剪验证 ==========
+0: jdbc:hive2://localhost:10000> -- 确认 PartitionPruner 只保留目标分区
+0: jdbc:hive2://localhost:10000> EXPLAIN EXTENDED
+. . . . . . . . . . . . . . . .> SELECT * FROM dws_user_day WHERE dt =  '2026-08-24';
+INFO  : Compiling command(queryId=hadoop_20260901152531_bd615850-6b0b-4747-8c9d-d20f5738456b): EXPLAIN EXTENDED
+SELECT * FROM dws_user_day WHERE dt = '2026-08-24'
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:Explain, type:string, comment:null)], properties:null)
+INFO  : Completed compiling command(queryId=hadoop_20260901152531_bd615850-6b0b-4747-8c9d-d20f5738456b); Time taken: 0.091 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hadoop_20260901152531_bd615850-6b0b-4747-8c9d-d20f5738456b): EXPLAIN EXTENDED
+SELECT * FROM dws_user_day WHERE dt = '2026-08-24'
+INFO  : Starting task [Stage-1:EXPLAIN] in serial mode
+INFO  : Completed executing command(queryId=hadoop_20260901152531_bd615850-6b0b-4747-8c9d-d20f5738456b); Time taken: 0.001 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
++----------------------------------------------------+
+|                      Explain                       |
++----------------------------------------------------+
+| STAGE DEPENDENCIES:                                |
+|   Stage-0 is a root stage                          |
+|                                                    |
+| STAGE PLANS:                                       |
+|   Stage: Stage-0                                   |
+|     Fetch Operator                                 |
+|       limit: -1                                    |
+|       Partition Description:                       |
+|           Partition                                |
+|             input format: org.apache.hadoop.mapred.TextInputFormat |
+|             output format: org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat |
+|             partition values:                      |
+|               dt 2026-08-24                        |
+|             properties:                            |
+|               COLUMN_STATS_ACCURATE {"BASIC_STATS":"true","COLUMN_STATS":{"cart_cnt":"true","first_event_time":"true","last_event_time":"true","order_cnt":"true","pay_amount":"true","pay_cnt":"true","pv_cnt":"true","session_cnt":"true","user_id":"true"}} |
+|               bucket_count -1                      |
+|               column.name.delimiter ,              |
+|               columns user_id,pv_cnt,cart_cnt,order_cnt,pay_cnt,pay_amount,session_cnt,first_event_time,last_event_time |
+|               columns.comments '用户ID','浏览次数','加购次数','下单次数','支付次数','支付金额','会话数','首次活跃时间','最后活跃时间' |
+|               columns.types string:bigint:bigint:bigint:bigint:decimal(18,2):bigint:timestamp:timestamp |
+|               field.delim 	                        |
+|               file.inputformat org.apache.hadoop.mapred.TextInputFormat |
+|               file.outputformat org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat |
+|               location hdfs://localhost:9000/user/hive/warehouse/gmall.db/dws_user_day/dt=2026-08-24 |
+|               name gmall.dws_user_day              |
+|               numFiles 1                           |
+|               numRows 1000                         |
+|               partition_columns dt                 |
+|               partition_columns.types string       |
+|               rawDataSize 66321                    |
+|               serialization.ddl struct dws_user_day { string user_id, i64 pv_cnt, i64 cart_cnt, i64 order_cnt, i64 pay_cnt, decimal(18,2) pay_amount, i64 session_cnt, timestamp first_event_time, timestamp last_event_time} |
+|               serialization.format 	               |
+|               serialization.lib org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe |
+|               totalSize 67321                      |
+|               transient_lastDdlTime 1788241712     |
+|             serde: org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe |
+|                                                    |
+|               input format: org.apache.hadoop.mapred.TextInputFormat |
+|               output format: org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat |
+|               properties:                          |
+|                 bucket_count -1                    |
+|                 bucketing_version 2                |
+|                 column.name.delimiter ,            |
+|                 columns user_id,pv_cnt,cart_cnt,order_cnt,pay_cnt,pay_amount,session_cnt,first_event_time,last_event_time |
+|                 columns.comments '用户ID','浏览次数','加购次数','下单次数','支付次数','支付金额','会话数','首次活跃时间','最后活跃时间' |
+|                 columns.types string:bigint:bigint:bigint:bigint:decimal(18,2):bigint:timestamp:timestamp |
+|                 comment 用户日汇总-DWS                  |
+|                 field.delim 	                      |
+|                 file.inputformat org.apache.hadoop.mapred.TextInputFormat |
+|                 file.outputformat org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat |
+|                 location hdfs://localhost:9000/user/hive/warehouse/gmall.db/dws_user_day |
+|                 name gmall.dws_user_day            |
+|                 partition_columns dt               |
+|                 partition_columns.types string     |
+|                 serialization.ddl struct dws_user_day { string user_id, i64 pv_cnt, i64 cart_cnt, i64 order_cnt, i64 pay_cnt, decimal(18,2) pay_amount, i64 session_cnt, timestamp first_event_time, timestamp last_event_time} |
+|                 serialization.format 	             |
+|                 serialization.lib org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe |
+|                 transient_lastDdlTime 1787656051   |
+|               serde: org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe |
+|               name: gmall.dws_user_day             |
+|             name: gmall.dws_user_day               |
+|       Processor Tree:                              |
+|         TableScan                                  |
+|           alias: dws_user_day                      |
+|           Statistics: Num rows: 1000 Data size: 66321 Basic stats: COMPLETE Column stats: NONE |
+|           GatherStats: false                       |
+|           Select Operator                          |
+|             expressions: user_id (type: string), pv_cnt (type: bigint), cart_cnt (type: bigint), order_cnt (type: bigint), pay_cnt (type: bigint), pay_amount (type: decimal(18,2)), session_cnt (type: bigint), first_event_time (type: timestamp), last_event_time (type: timestamp), '2026-08-24' (type: string) |
+|             outputColumnNames: _col0, _col1, _col2, _col3, _col4, _col5, _col6, _col7, _col8, _col9 |
+|             Statistics: Num rows: 1000 Data size: 66321 Basic stats: COMPLETE Column stats: NONE |
+|             ListSink                               |
+|                                                    |
++----------------------------------------------------+
+72 rows selected (0.139 seconds)
+0: jdbc:hive2://localhost:10000> 
+0: jdbc:hive2://localhost:10000> -- ========== 3.4 MapJoin 验证 ======== ==
+0: jdbc:hive2://localhost:10000> -- 开启后 JOIN 计划应出现 Map Join Operator
+0: jdbc:hive2://localhost:10000> SET hive.auto.convert.join = true;
+No rows affected (0.002 seconds)
+0: jdbc:hive2://localhost:10000> SET hive.mapjoin.smalltable.filesize  = 25000000;
+No rows affected (0.002 seconds)
+0: jdbc:hive2://localhost:10000> EXPLAIN
+. . . . . . . . . . . . . . . .> SELECT /*+ MAPJOIN(s) */ b.user_id, s .category_id
+. . . . . . . . . . . . . . . .> FROM dwd_user_behavior_di b
+. . . . . . . . . . . . . . . .> JOIN dim_sku s ON b.sku_id = s.sku_id 
+. . . . . . . . . . . . . . . .> WHERE b.dt = '2026-08-24';
+INFO  : Compiling command(queryId=hadoop_20260901152532_62f38901-61ad-43bf-9c39-565e9bee65d1): EXPLAIN
+SELECT /*+ MAPJOIN(s) */ b.user_id, s.category_id
+FROM dwd_user_behavior_di b
+JOIN dim_sku s ON b.sku_id = s.sku_id
+WHERE b.dt = '2026-08-24'
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:Explain, type:string, comment:null)], properties:null)
+INFO  : Completed compiling command(queryId=hadoop_20260901152532_62f38901-61ad-43bf-9c39-565e9bee65d1); Time taken: 0.147 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hadoop_20260901152532_62f38901-61ad-43bf-9c39-565e9bee65d1): EXPLAIN
+SELECT /*+ MAPJOIN(s) */ b.user_id, s.category_id
+FROM dwd_user_behavior_di b
+JOIN dim_sku s ON b.sku_id = s.sku_id
+WHERE b.dt = '2026-08-24'
+INFO  : Starting task [Stage-5:EXPLAIN] in serial mode
+INFO  : Completed executing command(queryId=hadoop_20260901152532_62f38901-61ad-43bf-9c39-565e9bee65d1); Time taken: 0.002 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
++----------------------------------------------------+
+|                      Explain                       |
++----------------------------------------------------+
+| STAGE DEPENDENCIES:                                |
+|   Stage-4 is a root stage                          |
+|   Stage-3 depends on stages: Stage-4               |
+|   Stage-0 depends on stages: Stage-3               |
+|                                                    |
+| STAGE PLANS:                                       |
+|   Stage: Stage-4                                   |
+|     Map Reduce Local Work                          |
+|       Alias -> Map Local Tables:                   |
+|         $hdt$_1:s                                  |
+|           Fetch Operator                           |
+|             limit: -1                              |
+|       Alias -> Map Local Operator Tree:            |
+|         $hdt$_1:s                                  |
+|           TableScan                                |
+|             alias: s                               |
+|             Statistics: Num rows: 500 Data size: 24673 Basic stats: COMPLETE Column stats: NONE |
+|             Filter Operator                        |
+|               predicate: sku_id is not null (type: boolean) |
+|               Statistics: Num rows: 500 Data size: 24673 Basic stats: COMPLETE Column stats: NONE |
+|               Select Operator                      |
+|                 expressions: sku_id (type: string), category_id (type: string) |
+|                 outputColumnNames: _col0, _col1    |
+|                 Statistics: Num rows: 500 Data size: 24673 Basic stats: COMPLETE Column stats: NONE |
+|                 HashTable Sink Operator            |
+|                   keys:                            |
+|                     0 _col1 (type: string)         |
+|                     1 _col0 (type: string)         |
+|                                                    |
+|   Stage: Stage-3                                   |
+|     Map Reduce                                     |
+|       Map Operator Tree:                           |
+|           TableScan                                |
+|             alias: b                               |
+|             Statistics: Num rows: 20163 Data size: 1553653 Basic stats: COMPLETE Column stats: NONE |
+|             Filter Operator                        |
+|               predicate: sku_id is not null (type: boolean) |
+|               Statistics: Num rows: 20163 Data size: 1553653 Basic stats: COMPLETE Column stats: NONE |
+|               Select Operator                      |
+|                 expressions: user_id (type: string), sku_id (type: string) |
+|                 outputColumnNames: _col0, _col1    |
+|                 Statistics: Num rows: 20163 Data size: 1553653 Basic stats: COMPLETE Column stats: NONE |
+|                 Map Join Operator                  |
+|                   condition map:                   |
+|                        Inner Join 0 to 1           |
+|                   keys:                            |
+|                     0 _col1 (type: string)         |
+|                     1 _col0 (type: string)         |
+|                   outputColumnNames: _col0, _col4  |
+|                   Statistics: Num rows: 22179 Data size: 1709018 Basic stats: COMPLETE Column stats: NONE |
+|                   Select Operator                  |
+|                     expressions: _col0 (type: string), _col4 (type: string) |
+|                     outputColumnNames: _col0, _col1 |
+|                     Statistics: Num rows: 22179 Data size: 1709018 Basic stats: COMPLETE Column stats: NONE |
+|                     File Output Operator           |
+|                       compressed: false            |
+|                       Statistics: Num rows: 22179 Data size: 1709018 Basic stats: COMPLETE Column stats: NONE |
+|                       table:                       |
+|                           input format: org.apache.hadoop.mapred.SequenceFileInputFormat |
+|                           output format: org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat |
+|                           serde: org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe |
+|       Execution mode: vectorized                   |
+|       Local Work:                                  |
+|         Map Reduce Local Work                      |
+|                                                    |
+|   Stage: Stage-0                                   |
+|     Fetch Operator                                 |
+|       limit: -1                                    |
+|       Processor Tree:                              |
+|         ListSink                                   |
+|                                                    |
++----------------------------------------------------+
+71 rows selected (0.191 seconds)
+0: jdbc:hive2://localhost:10000> 
+0: jdbc:hive2://localhost:10000> -- ========== 3.1 ORC 转换（建 ORC 表并拷贝数据 验证格式差异） ==========
+0: jdbc:hive2://localhost:10000> -- 按 dt 动态分区写入需开启 nonstrict（见 3.5 调优参 数）
+0: jdbc:hive2://localhost:10000> SET hive.exec.dynamic.partition = tru e;
+No rows affected (0.002 seconds)
+0: jdbc:hive2://localhost:10000> SET hive.exec.dynamic.partition.mode  = nonstrict;
+No rows affected (0.002 seconds)
+0: jdbc:hive2://localhost:10000> 
+0: jdbc:hive2://localhost:10000> CREATE TABLE IF NOT EXISTS dws_user_d ay_orc (
+. . . . . . . . . . . . . . . .>     user_id STRING, pv_cnt BIGINT, ca rt_cnt BIGINT,
+. . . . . . . . . . . . . . . .>     order_cnt BIGINT, pay_cnt BIGINT,  pay_amount DECIMAL(18,2),
+. . . . . . . . . . . . . . . .>     session_cnt BIGINT, first_event_t ime TIMESTAMP, last_event_time TIMESTAMP
+. . . . . . . . . . . . . . . .> ) PARTITIONED BY (dt STRING) STORED A S ORC;
+INFO  : Compiling command(queryId=hadoop_20260901152532_2acfa9cd-eb2c-4653-8505-e04b8ad58687): CREATE TABLE IF NOT EXISTS dws_user_day_orc (
+user_id STRING, pv_cnt BIGINT, cart_cnt BIGINT,
+order_cnt BIGINT, pay_cnt BIGINT, pay_amount DECIMAL(18,2),
+session_cnt BIGINT, first_event_time TIMESTAMP, last_event_time TIMESTAMP
+) PARTITIONED BY (dt STRING) STORED AS ORC
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:null, properties:null)
+INFO  : Completed compiling command(queryId=hadoop_20260901152532_2acfa9cd-eb2c-4653-8505-e04b8ad58687); Time taken: 0.02 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hadoop_20260901152532_2acfa9cd-eb2c-4653-8505-e04b8ad58687): CREATE TABLE IF NOT EXISTS dws_user_day_orc (
+user_id STRING, pv_cnt BIGINT, cart_cnt BIGINT,
+order_cnt BIGINT, pay_cnt BIGINT, pay_amount DECIMAL(18,2),
+session_cnt BIGINT, first_event_time TIMESTAMP, last_event_time TIMESTAMP
+) PARTITIONED BY (dt STRING) STORED AS ORC
+INFO  : Completed executing command(queryId=hadoop_20260901152532_2acfa9cd-eb2c-4653-8505-e04b8ad58687); Time taken: 0.0 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
+No rows affected (0.031 seconds)
+0: jdbc:hive2://localhost:10000> 
+0: jdbc:hive2://localhost:10000> INSERT OVERWRITE TABLE dws_user_day_o rc PARTITION (dt)
+. . . . . . . . . . . . . . . .> SELECT user_id, pv_cnt, cart_cnt, ord er_cnt, pay_cnt, pay_amount,
+. . . . . . . . . . . . . . . .>        session_cnt, first_event_time,  last_event_time, dt
+. . . . . . . . . . . . . . . .> FROM dws_user_day;
+INFO  : Compiling command(queryId=hadoop_20260901152532_5ba99216-0daa-404e-af53-32f062631691): INSERT OVERWRITE TABLE dws_user_day_orc PARTITION (dt)
+SELECT user_id, pv_cnt, cart_cnt, order_cnt, pay_cnt, pay_amount,
+session_cnt, first_event_time, last_event_time, dt
+FROM dws_user_day
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:user_id, type:string, comment:null), FieldSchema(name:pv_cnt, type:bigint, comment:null), FieldSchema(name:cart_cnt, type:bigint, comment:null), FieldSchema(name:order_cnt, type:bigint, comment:null), FieldSchema(name:pay_cnt, type:bigint, comment:null), FieldSchema(name:pay_amount, type:decimal(18,2), comment:null), FieldSchema(name:session_cnt, type:bigint, comment:null), FieldSchema(name:first_event_time, type:timestamp, comment:null), FieldSchema(name:last_event_time, type:timestamp, comment:null), FieldSchema(name:dt, type:string, comment:null)], properties:null)
+INFO  : Completed compiling command(queryId=hadoop_20260901152532_5ba99216-0daa-404e-af53-32f062631691); Time taken: 0.182 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hadoop_20260901152532_5ba99216-0daa-404e-af53-32f062631691): INSERT OVERWRITE TABLE dws_user_day_orc PARTITION (dt)
+SELECT user_id, pv_cnt, cart_cnt, order_cnt, pay_cnt, pay_amount,
+session_cnt, first_event_time, last_event_time, dt
+FROM dws_user_day
+WARN  : Hive-on-MR is deprecated in Hive 2 and may not be available in the future versions. Consider using a different execution engine (i.e. spark, tez) or using Hive 1.X releases.
+INFO  : Query ID = hadoop_20260901152532_5ba99216-0daa-404e-af53-32f062631691
+INFO  : Total jobs = 1
+INFO  : Launching Job 1 out of 1
+INFO  : Starting task [Stage-1:MAPRED] in serial mode
+INFO  : Number of reduce tasks not specified. Estimated from input data size: 1
+INFO  : In order to change the average load for a reducer (in bytes):
+INFO  :   set hive.exec.reducers.bytes.per.reducer=<number>
+INFO  : In order to limit the maximum number of reducers:
+INFO  :   set hive.exec.reducers.max=<number>
+INFO  : In order to set a constant number of reducers:
+INFO  :   set mapreduce.job.reduces=<number>
+INFO  : number of splits:1
+INFO  : Submitting tokens for job: job_1788239956390_0258
+INFO  : Executing with tokens: []
+INFO  : The url to track the job: http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0258/
+INFO  : Starting Job = job_1788239956390_0258, Tracking URL = http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0258/
+INFO  : Kill Command = /opt/hadoop-3.3.6/bin/mapred job  -kill job_1788239956390_0258
+INFO  : Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+INFO  : 2026-09-01 15:25:39,555 Stage-1 map = 0%,  reduce = 0%
+INFO  : 2026-09-01 15:25:43,646 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 5.86 sec
+INFO  : 2026-09-01 15:25:47,713 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 7.25 sec
+INFO  : MapReduce Total cumulative CPU time: 7 seconds 250 msec
+INFO  : Ended Job = job_1788239956390_0258
+INFO  : Starting task [Stage-7:CONDITIONAL] in serial mode
+INFO  : Stage-4 is selected by condition resolver.
+INFO  : Stage-3 is filtered out by condition resolver.
+INFO  : Stage-5 is filtered out by condition resolver.
+INFO  : Starting task [Stage-4:MOVE] in serial mode
+INFO  : Moving data to directory hdfs://localhost:9000/user/hive/warehouse/gmall.db/dws_user_day_orc/.hive-staging_hive_2026-09-01_15-25-32_636_7479970125334186996-8/-ext-10000 from hdfs://localhost:9000/user/hive/warehouse/gmall.db/dws_user_day_orc/.hive-staging_hive_2026-09-01_15-25-32_636_7479970125334186996-8/-ext-10002
+INFO  : Starting task [Stage-0:MOVE] in serial mode
+INFO  : Loading data to table gmall.dws_user_day_orc partition (dt=null) from hdfs://localhost:9000/user/hive/warehouse/gmall.db/dws_user_day_orc/.hive-staging_hive_2026-09-01_15-25-32_636_7479970125334186996-8/-ext-10000
+INFO  : 
+
+INFO  : 	 Time taken to load dynamic partitions: 0.199 seconds
+INFO  : 	 Time taken for adding to write entity : 0.001 seconds
+INFO  : Starting task [Stage-2:STATS] in serial mode
+INFO  : MapReduce Jobs Launched: 
+INFO  : Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 7.25 sec   HDFS Read: 365537 HDFS Write: 99155 SUCCESS
+INFO  : Total MapReduce CPU Time Spent: 7 seconds 250 msec
+INFO  : Completed executing command(queryId=hadoop_20260901152532_5ba99216-0daa-404e-af53-32f062631691); Time taken: 17.444 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
+No rows affected (17.634 seconds)
+0: jdbc:hive2://localhost:10000> 
+0: jdbc:hive2://localhost:10000> -- 验证 ORC 表行数与分区
+0: jdbc:hive2://localhost:10000> SELECT dt, COUNT(*) AS cnt FROM dws_u ser_day_orc GROUP BY dt ORDER BY dt;
+INFO  : Compiling command(queryId=hadoop_20260901152550_73e9c403-2e31-4c5d-97dd-b3bd487cca68): SELECT dt, COUNT(*) AS cnt FROM dws_user_day_orc GROUP BY dt ORDER BY dt
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:dt, type:string, comment:null), FieldSchema(name:cnt, type:bigint, comment:null)], properties:null)
+INFO  : Completed compiling command(queryId=hadoop_20260901152550_73e9c403-2e31-4c5d-97dd-b3bd487cca68); Time taken: 0.103 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hadoop_20260901152550_73e9c403-2e31-4c5d-97dd-b3bd487cca68): SELECT dt, COUNT(*) AS cnt FROM dws_user_day_orc GROUP BY dt ORDER BY dt
+WARN  : Hive-on-MR is deprecated in Hive 2 and may not be available in the future versions. Consider using a different execution engine (i.e. spark, tez) or using Hive 1.X releases.
+INFO  : Query ID = hadoop_20260901152550_73e9c403-2e31-4c5d-97dd-b3bd487cca68
+INFO  : Total jobs = 2
+INFO  : Launching Job 1 out of 2
+INFO  : Starting task [Stage-1:MAPRED] in serial mode
+INFO  : Number of reduce tasks not specified. Estimated from input data size: 1
+INFO  : In order to change the average load for a reducer (in bytes):
+INFO  :   set hive.exec.reducers.bytes.per.reducer=<number>
+INFO  : In order to limit the maximum number of reducers:
+INFO  :   set hive.exec.reducers.max=<number>
+INFO  : In order to set a constant number of reducers:
+INFO  :   set mapreduce.job.reduces=<number>
+INFO  : number of splits:1
+INFO  : Submitting tokens for job: job_1788239956390_0259
+INFO  : Executing with tokens: []
+INFO  : The url to track the job: http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0259/
+INFO  : Starting Job = job_1788239956390_0259, Tracking URL = http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0259/
+INFO  : Kill Command = /opt/hadoop-3.3.6/bin/mapred job  -kill job_1788239956390_0259
+INFO  : Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+INFO  : 2026-09-01 15:25:59,525 Stage-1 map = 0%,  reduce = 0%
+INFO  : 2026-09-01 15:26:03,595 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 1.44 sec
+INFO  : 2026-09-01 15:26:08,668 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 2.76 sec
+INFO  : MapReduce Total cumulative CPU time: 2 seconds 760 msec
+INFO  : Ended Job = job_1788239956390_0259
+INFO  : Launching Job 2 out of 2
+INFO  : Starting task [Stage-2:MAPRED] in serial mode
+INFO  : Number of reduce tasks determined at compile time: 1
+INFO  : In order to change the average load for a reducer (in bytes):
+INFO  :   set hive.exec.reducers.bytes.per.reducer=<number>
+INFO  : In order to limit the maximum number of reducers:
+INFO  :   set hive.exec.reducers.max=<number>
+INFO  : In order to set a constant number of reducers:
+INFO  :   set mapreduce.job.reduces=<number>
+INFO  : number of splits:1
+INFO  : Submitting tokens for job: job_1788239956390_0260
+INFO  : Executing with tokens: []
+INFO  : The url to track the job: http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0260/
+INFO  : Starting Job = job_1788239956390_0260, Tracking URL = http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0260/
+INFO  : Kill Command = /opt/hadoop-3.3.6/bin/mapred job  -kill job_1788239956390_0260
+INFO  : Hadoop job information for Stage-2: number of mappers: 1; number of reducers: 1
+INFO  : 2026-09-01 15:26:19,791 Stage-2 map = 0%,  reduce = 0%
+INFO  : 2026-09-01 15:26:23,860 Stage-2 map = 100%,  reduce = 0%, Cumulative CPU 4.67 sec
+INFO  : 2026-09-01 15:26:28,940 Stage-2 map = 100%,  reduce = 100%, Cumulative CPU 5.99 sec
+INFO  : MapReduce Total cumulative CPU time: 5 seconds 990 msec
+INFO  : Ended Job = job_1788239956390_0260
+INFO  : MapReduce Jobs Launched: 
+INFO  : Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 2.76 sec   HDFS Read: 86401 HDFS Write: 251 SUCCESS
+INFO  : Stage-Stage-2: Map: 1  Reduce: 1   Cumulative CPU: 5.99 sec   HDFS Read: 7686 HDFS Write: 227 SUCCESS
+INFO  : Total MapReduce CPU Time Spent: 8 seconds 750 msec
+INFO  : Completed executing command(queryId=hadoop_20260901152550_73e9c403-2e31-4c5d-97dd-b3bd487cca68); Time taken: 39.561 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
++-------------+-------+
+|     dt      |  cnt  |
++-------------+-------+
+| 2026-08-20  | 1000  |
+| 2026-08-21  | 1000  |
+| 2026-08-22  | 1000  |
+| 2026-08-23  | 1000  |
+| 2026-08-24  | 1000  |
++-------------+-------+
+5 rows selected (39.685 seconds)
+0: jdbc:hive2://localhost:10000> Closing: 0: jdbc:hive2://localhost:10000

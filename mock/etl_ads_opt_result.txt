@@ -1,0 +1,125 @@
+SLF4J: Class path contains multiple SLF4J bindings.
+SLF4J: Found binding in [jar:file:/opt/hive/lib/log4j-slf4j-impl-2.17.1.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/opt/hadoop-3.3.6/share/hadoop/common/lib/slf4j-reload4j-1.7.36.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J: Actual binding is of type [org.apache.logging.slf4j.Log4jLoggerFactory]
+Connecting to jdbc:hive2://localhost:10000
+Connected to: Apache Hive (version 3.1.3)
+Driver: Hive JDBC (version 3.1.3)
+Transaction isolation: TRANSACTION_REPEATABLE_READ
+0: jdbc:hive2://localhost:10000> USE gmall;
+INFO  : Compiling command(queryId=hadoop_20260901143633_513a5da1-8bb6-4351-8e7b-a13db59b34ec): USE gmall
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:null, properties:null)
+INFO  : Completed compiling command(queryId=hadoop_20260901143633_513a5da1-8bb6-4351-8e7b-a13db59b34ec); Time taken: 0.036 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hadoop_20260901143633_513a5da1-8bb6-4351-8e7b-a13db59b34ec): USE gmall
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hadoop_20260901143633_513a5da1-8bb6-4351-8e7b-a13db59b34ec); Time taken: 0.006 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
+No rows affected (0.071 seconds)
+0: jdbc:hive2://localhost:10000> -- ================================== ==========================
+0: jdbc:hive2://localhost:10000> -- ADS 指标计算（优化版）
+0: jdbc:hive2://localhost:10000> -- 优化思路（边开发边学）：
+0: jdbc:hive2://localhost:10000> --   1. 开启本地模式：数据小，本地模式跳过 YARN 直接 JVM  执行，是最大免费提速
+0: jdbc:hive2://localhost:10000> --      （hive.exec.mode.local.auto=tr ue 会在数据量超过阈值时自动回退集群，安全）
+0: jdbc:hive2://localhost:10000> --   2. 复购率用"中间结果表"：先按 (user_id,dt) 聚 合一次订单数到 tmp 小表，
+0: jdbc:hive2://localhost:10000> --      避免 5 次全表扫描 dwd_order_fact_di， 再基于小表逐日累计
+0: jdbc:hive2://localhost:10000> --   3. DAU 用 LEFT JOIN 派生表方式，规避"Hive  聚合函数内不支持子查询"的报错
+0: jdbc:hive2://localhost:10000> -- ================================== ==========================
+0: jdbc:hive2://localhost:10000> 
+0: jdbc:hive2://localhost:10000> SET hive.exec.mode.local.auto=true;
+No rows affected (0.003 seconds)
+0: jdbc:hive2://localhost:10000> SET hive.exec.mode.local.auto.inputby tes.max=134217728;
+No rows affected (0.002 seconds)
+0: jdbc:hive2://localhost:10000> SET mapreduce.job.reduces=4;
+No rows affected (0.002 seconds)
+0: jdbc:hive2://localhost:10000> 
+0: jdbc:hive2://localhost:10000> -- ---------- 指标一：DAU（ads_dau，非分区表） - ---------
+0: jdbc:hive2://localhost:10000> -- 思路：当天活跃用户 t，LEFT JOIN 历史/昨日，分别打 ne w/active/wakeup 标记
+0: jdbc:hive2://localhost:10000> TRUNCATE TABLE ads_dau;
+INFO  : Compiling command(queryId=hadoop_20260901143633_cc18f6b1-c19e-41f4-8914-e63273131763): TRUNCATE TABLE ads_dau
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:null, properties:null)
+INFO  : Completed compiling command(queryId=hadoop_20260901143633_cc18f6b1-c19e-41f4-8914-e63273131763); Time taken: 0.02 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hadoop_20260901143633_cc18f6b1-c19e-41f4-8914-e63273131763): TRUNCATE TABLE ads_dau
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hadoop_20260901143633_cc18f6b1-c19e-41f4-8914-e63273131763); Time taken: 0.065 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
+No rows affected (0.097 seconds)
+0: jdbc:hive2://localhost:10000> -- 08-20 首日：无历史、无昨日
+0: jdbc:hive2://localhost:10000> INSERT INTO ads_dau
+. . . . . . . . . . . . . . . .> SELECT '2026-08-20',
+. . . . . . . . . . . . . . . .>   COUNT(DISTINCT t.user_id) dau, 0 ne w_dau, 0 active_dau, 0 wakeup_dau
+. . . . . . . . . . . . . . . .> FROM (SELECT DISTINCT user_id FROM dw s_user_day WHERE dt='2026-08-20' AND pv_cnt>0) t;
+INFO  : Compiling command(queryId=hadoop_20260901143633_af58176b-ac9a-4e29-8e68-1ee7b86f4021): INSERT INTO ads_dau
+SELECT '2026-08-20',
+COUNT(DISTINCT t.user_id) dau, 0 new_dau, 0 active_dau, 0 wakeup_dau
+FROM (SELECT DISTINCT user_id FROM dws_user_day WHERE dt='2026-08-20' AND pv_cnt>0) t
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:_col0, type:string, comment:null), FieldSchema(name:_col1, type:bigint, comment:null), FieldSchema(name:_col2, type:bigint, comment:null), FieldSchema(name:_col3, type:bigint, comment:null), FieldSchema(name:_col4, type:bigint, comment:null)], properties:null)
+INFO  : Completed compiling command(queryId=hadoop_20260901143633_af58176b-ac9a-4e29-8e68-1ee7b86f4021); Time taken: 0.18 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hadoop_20260901143633_af58176b-ac9a-4e29-8e68-1ee7b86f4021): INSERT INTO ads_dau
+SELECT '2026-08-20',
+COUNT(DISTINCT t.user_id) dau, 0 new_dau, 0 active_dau, 0 wakeup_dau
+FROM (SELECT DISTINCT user_id FROM dws_user_day WHERE dt='2026-08-20' AND pv_cnt>0) t
+WARN  : Hive-on-MR is deprecated in Hive 2 and may not be available in the future versions. Consider using a different execution engine (i.e. spark, tez) or using Hive 1.X releases.
+INFO  : Query ID = hadoop_20260901143633_af58176b-ac9a-4e29-8e68-1ee7b86f4021
+INFO  : Total jobs = 2
+INFO  : Launching Job 1 out of 2
+INFO  : Starting task [Stage-1:MAPRED] in serial mode
+INFO  : Number of reduce tasks not specified. Defaulting to jobconf value of: 4
+INFO  : In order to change the average load for a reducer (in bytes):
+INFO  :   set hive.exec.reducers.bytes.per.reducer=<number>
+INFO  : In order to limit the maximum number of reducers:
+INFO  :   set hive.exec.reducers.max=<number>
+INFO  : In order to set a constant number of reducers:
+INFO  :   set mapreduce.job.reduces=<number>
+INFO  : Cannot run job locally: Number of reducers (= 4) is more than 1
+INFO  : number of splits:1
+INFO  : Submitting tokens for job: job_1788239956390_0175
+INFO  : Executing with tokens: []
+INFO  : The url to track the job: http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0175/
+INFO  : Starting Job = job_1788239956390_0175, Tracking URL = http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0175/
+INFO  : Kill Command = /opt/hadoop-3.3.6/bin/mapred job  -kill job_1788239956390_0175
+INFO  : Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 4
+INFO  : 2026-09-01 14:36:41,394 Stage-1 map = 0%,  reduce = 0%
+INFO  : 2026-09-01 14:36:45,476 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 4.46 sec
+INFO  : 2026-09-01 14:36:50,572 Stage-1 map = 100%,  reduce = 25%, Cumulative CPU 6.05 sec
+INFO  : 2026-09-01 14:36:51,587 Stage-1 map = 100%,  reduce = 75%, Cumulative CPU 9.07 sec
+INFO  : 2026-09-01 14:36:52,603 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 10.5 sec
+INFO  : MapReduce Total cumulative CPU time: 10 seconds 500 msec
+INFO  : Ended Job = job_1788239956390_0175
+INFO  : Launching Job 2 out of 2
+INFO  : Starting task [Stage-2:MAPRED] in serial mode
+INFO  : Number of reduce tasks determined at compile time: 1
+INFO  : In order to change the average load for a reducer (in bytes):
+INFO  :   set hive.exec.reducers.bytes.per.reducer=<number>
+INFO  : In order to limit the maximum number of reducers:
+INFO  :   set hive.exec.reducers.max=<number>
+INFO  : In order to set a constant number of reducers:
+INFO  :   set mapreduce.job.reduces=<number>
+INFO  : Selecting local mode for task: Stage-2
+INFO  : number of splits:1
+INFO  : Submitting tokens for job: job_local79144404_0006
+INFO  : Executing with tokens: []
+INFO  : The url to track the job: http://localhost:8080/
+INFO  : Job running in-process (local Hadoop)
+INFO  : 2026-09-01 14:36:55,199 Stage-2 map = 0%,  reduce = 0%
+ERROR : Ended Job = job_local79144404_0006 with errors
+ERROR : FAILED: Execution Error, return code 2 from org.apache.hadoop.hive.ql.exec.mr.MapRedTask
+INFO  : MapReduce Jobs Launched: 
+INFO  : Stage-Stage-1: Map: 1  Reduce: 4   Cumulative CPU: 10.5 sec   HDFS Read: 103938 HDFS Write: 25384 SUCCESS
+INFO  : Stage-Stage-2:  HDFS Read: 0 HDFS Write: 0 FAIL
+INFO  : Total MapReduce CPU Time Spent: 10 seconds 500 msec
+INFO  : Completed executing command(queryId=hadoop_20260901143633_af58176b-ac9a-4e29-8e68-1ee7b86f4021); Time taken: 21.346 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+Error: Error while processing statement: FAILED: Execution Error, return code 2 from org.apache.hadoop.hive.ql.exec.mr.MapRedTask (state=08S01,code=2)
+Closing: 0: jdbc:hive2://localhost:10000

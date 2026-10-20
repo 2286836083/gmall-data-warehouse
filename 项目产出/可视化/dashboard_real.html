@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>电商用户行为分析 · 数据大屏（真实数据链路）</title>
+<style>
+  :root{
+    --bg:#08101f;
+    --bg2:#0d1a2f;
+    --panel:rgba(255,255,255,.035);
+    --line:rgba(0,212,255,.16);
+    --line2:rgba(0,212,255,.34);
+    --txt:#e8f2ff;
+    --muted:#7d93b2;
+    --cyan:#00d4ff;
+    --blue:#3b82f6;
+    --purple:#8b5cf6;
+    --amber:#f5a524;
+    --teal:#2dd4bf;
+    --pink:#ec4899;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0,212,255,.10), transparent 60%),
+      var(--bg);
+    color:var(--txt);
+    font-family:-apple-system,"PingFang SC","Microsoft YaHei","Segoe UI",sans-serif;
+    min-height:100vh;
+    padding:16px 20px 28px;
+  }
+
+  header{display:flex;align-items:flex-end;justify-content:space-between;
+    padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:16px;flex-wrap:wrap;gap:10px}
+  h1{font-size:23px;font-weight:600;letter-spacing:1px}
+  h1 span{color:var(--cyan)}
+  .sub{font-size:12.5px;color:var(--muted);margin-top:5px}
+  .meta{font-size:12px;color:var(--muted);text-align:right;line-height:1.7}
+  .meta b{color:var(--cyan);font-weight:500}
+  .badge{display:inline-block;font-size:11.5px;padding:2px 9px;border-radius:20px;
+    border:1px solid rgba(45,212,191,.5);background:rgba(45,212,191,.10);color:var(--teal);
+    margin-left:8px;vertical-align:middle}
+
+  .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:12px}
+  .kpi{
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:13px 15px;position:relative;overflow:hidden;
+  }
+  .kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--cyan);opacity:.85}
+  .kpi.k2::before{background:var(--blue)}
+  .kpi.k3::before{background:var(--purple)}
+  .kpi.k4::before{background:var(--amber)}
+  .kpi.k5::before{background:var(--teal)}
+  .kpi.k6::before{background:var(--pink)}
+  .kpi .label{font-size:12px;color:var(--muted);margin-bottom:7px}
+  .kpi .value{font-size:25px;font-weight:600;letter-spacing:.5px;line-height:1}
+  .kpi .value small{font-size:13px;font-weight:400;color:var(--muted);margin-left:3px}
+  .kpi .foot{font-size:11.5px;color:var(--muted);margin-top:6px}
+
+  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px 6px}
+  .card h3{font-size:13.5px;font-weight:500;color:var(--txt);margin-bottom:2px;
+    padding-left:9px;border-left:3px solid var(--cyan);line-height:1.2}
+  .card h3 em{font-style:normal;font-size:11.5px;color:var(--muted);font-weight:400;margin-left:7px}
+  .chart{width:100%;height:290px}
+  .chart.short{height:215px}
+  .col4{grid-column:span 4}.col5{grid-column:span 5}
+  .col6{grid-column:span 6}.col7{grid-column:span 7}
+  .col8{grid-column:span 8}.col12{grid-column:span 12}
+
+  .defs{font-size:12.5px;line-height:1.95;color:var(--muted);padding:6px 4px 10px}
+  .defs b{color:var(--txt);font-weight:500}
+  .defs .k{color:var(--cyan);font-weight:500}
+  .defs .new{color:var(--teal);font-weight:500}
+
+  footer{margin-top:18px;padding-top:12px;border-top:1px solid var(--line);
+    font-size:11.5px;color:var(--muted);text-align:center;line-height:1.8}
+
+  #err{display:none;background:rgba(245,165,36,.08);border:1px solid rgba(245,165,36,.45);
+    border-radius:10px;padding:18px 20px;font-size:13.5px;line-height:1.9;margin-bottom:14px}
+  #err b{color:var(--amber)}
+  code{background:rgba(0,212,255,.10);color:var(--cyan);padding:2px 6px;border-radius:4px;
+    font-family:ui-monospace,Consolas,monospace;font-size:12.5px}
+
+  @media (max-width:1400px){
+    .kpis{grid-template-columns:repeat(3,1fr)}
+    .col4,.col5,.col6,.col7,.col8,.col12{grid-column:span 12}
+  }
+  @media print{
+    body{background:#fff;color:#111}
+    .kpi .value,.defs .k,.defs .new{color:#0b6ba8}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>电商用户行为分析 <span>· 离线数仓数据大屏</span><span class="badge" id="badge">真实数据</span></h1>
+    <div class="sub">数据链路：REES46 真实数据（1063 万行）→ ODS 原始层 → DWD/DIM 明细与维度层 → DWS 汇总层 → ADS 指标层 → 可视化</div>
+  </div>
+  <div class="meta">
+    数据区间：<b id="range">—</b><br>
+    数据导出时间：<b id="gen">—</b><br>
+    数据源：Hive <b>gmall</b> 库 · <b id="src">—</b>
+  </div>
+</header>
+
+<div id="err">
+  <b>数据文件未加载。</b><br>
+  这个页面依赖同目录下的两个文件：<code>dashboard_data_real.js</code>（数据）和 <code>echarts.min.js</code>（图表库）。<br>
+  请确认它们与 <code>dashboard_real.html</code> 放在同一个文件夹里。<br>
+  数据文件由集群上的导出脚本生成：<code>bash export_dashboard_real.sh</code>
+</div>
+
+<div class="kpis">
+  <div class="kpi k1"><div class="label">日均活跃用户 DAU</div><div class="value" id="k-dau">—</div><div class="foot">每日去重活跃用户</div></div>
+  <div class="kpi k2"><div class="label">成交笔数</div><div class="value" id="k-orders">—</div><div class="foot">一行购买事件 = 一笔成交</div></div>
+  <div class="kpi k3"><div class="label">客单价</div><div class="value" id="k-aov">—</div><div class="foot">成交金额 ÷ 成交笔数</div></div>
+  <div class="kpi k4"><div class="label">成交金额 GMV</div><div class="value" id="k-gmv">—</div><div class="foot">全月累计成交金额</div></div>
+  <div class="kpi k5"><div class="label">整体转化率</div><div class="value" id="k-conv">—</div><div class="foot">购买用户 ÷ 浏览用户</div></div>
+  <div class="kpi k6"><div class="label">累计复购率</div><div class="value" id="k-rep">—</div><div class="foot">购买 ≥2 次用户占比（月末累计）</div></div>
+</div>
+
+<div class="grid">
+  <div class="card col4">
+    <h3>转化漏斗 <em>浏览 → 加购 → 购买（三环节）</em></h3>
+    <div class="chart" id="c-funnel"></div>
+  </div>
+  <div class="card col8">
+    <h3>用户转化趋势 <em>各环节去重用户数（按天）</em></h3>
+    <div class="chart" id="c-trend"></div>
+  </div>
+
+  <div class="card col6">
+    <h3>热销商品 TOP15 <em>按成交金额排名（品牌 · 二级类目）</em></h3>
+    <div class="chart" id="c-sku"></div>
+  </div>
+  <div class="card col6">
+    <h3>成交趋势 <em>每日成交金额 与 客单价</em></h3>
+    <div class="chart" id="c-gmv"></div>
+  </div>
+
+  <div class="card col6">
+    <h3>用户构成 <em>新增 / 连续活跃 / 回流（按天堆叠）</em></h3>
+    <div class="chart short" id="c-user"></div>
+  </div>
+  <div class="card col6">
+    <h3>指标口径说明 <em>面试与答辩会被问到</em></h3>
+    <div class="defs">
+      <div><span class="k">DAU</span>：当天产生过任意行为（浏览/加购/购买）的<b>去重用户数</b>。</div>
+      <div><span class="new">新增用户</span>：<b>首次出现日 = 当天</b>的用户（真实数据能算出真值；模拟数据这条恒为 0）。</div>
+      <div><span class="new">连续活跃 / 回流</span>：上一次活跃日是<b>昨天</b> → 连续活跃；不是昨天 → 回流。</div>
+      <div><span class="k">转化漏斗</span>：浏览 → 加购 → 购买的<b>去重用户数</b>，<b>三环节</b>。</div>
+      <div><span class="k">整体转化率</span>：购买用户 ÷ 浏览用户。加购<b>不是</b>购买的必经环节（用户可直达购买）。</div>
+      <div><span class="k">成交笔数 / GMV</span>：一行购买事件 = 一笔成交；GMV = 成交金额合计。</div>
+      <div><span class="new">为什么没有"订单状态"</span>：源数据（REES46）是<b>用户行为事件流</b>，没有"已取消/已退款"这类订单状态字段。</div>
+      <div><span class="new">类目主题</span>：源数据的类目是<b>点分层级路径</b>（如 electronics.smartphone），故可拆三级并做类目维度汇总。</div>
+      <div><span class="k">明细粒度</span>：ADS 层每指标每天一条；ODS/DWD/DWS 按天分区存储（31 个分区）。</div>
+    </div>
+  </div>
+
+  <div class="card col12">
+    <h3>一级类目 GMV 构成 <em>全月 31 天累计（类目主题 · 新链路独有）</em></h3>
+    <div class="chart short" id="c-cat"></div>
+  </div>
+</div>
+
+<footer>
+  本项目为「电商用户行为分析离线数仓」实战项目 · Hadoop 3.3.6 + Hive 3.1.3 + DolphinScheduler 3.1.8 三节点集群<br>
+  本页数据源：<b>真实数据链路</b>（REES46，ODS 10,630,245 行）· 页面为纯静态文件，双击即可打开，不依赖网络与后端服务
+</footer>
+
+<script src="./echarts.min.js"></script>
+<script src="./dashboard_data_real.js"></script>
+<script>
+(function () {
+  var D = window.DASHBOARD_DATA;
+  if (!D) { document.getElementById('err').style.display = 'block'; return; }
+
+  var C = { cyan:'#00d4ff', blue:'#3b82f6', purple:'#8b5cf6', amber:'#f5a524',
+            teal:'#2dd4bf', pink:'#ec4899', muted:'#7d93b2', line:'rgba(255,255,255,.08)' };
+
+  function num(n) { return (n === null || n === undefined) ? '—' : Number(n).toLocaleString('zh-CN'); }
+  function money(n) {
+    if (n === null || n === undefined) return '—';
+    n = Number(n);
+    if (n >= 1e8) return '¥' + (n / 1e8).toFixed(2) + '<small>亿</small>';
+    if (n >= 1e4) return '¥' + (n / 1e4).toFixed(1) + '<small>万</small>';
+    return '¥' + n.toFixed(2);
+  }
+  function pct(n, d) { return n === null || n === undefined ? '—' : (Number(n) * 100).toFixed(d === undefined ? 2 : d) + '<small>%</small>'; }
+  function sum(arr, key) { return arr.reduce(function (s, r) { return s + (Number(r[key]) || 0); }, 0); }
+  function avg(arr, key) { return arr.length ? sum(arr, key) / arr.length : 0; }
+  function lastVal(arr, key) { return arr.length ? arr[arr.length - 1][key] : null; }
+  // 真实数据没有"商品名"，用 品牌 · 二级类目 描述；品牌缺失（unknown）时只显示类目
+  function prodLabel(r) {
+    var b = (r.brand && r.brand !== 'unknown') ? r.brand : '';
+    var c = r.category_l2 && r.category_l2 !== 'unknown' ? r.category_l2 : (r.category_l1 || '');
+    return b ? (b + ' · ' + c) : (c || ('商品 #' + r.product_id));
+  }
+
+  var dau = D.dau || [], funnel = D.funnel || [], rep = D.repurchase || [],
+      sku = D.top_product || [], trade = D.trade_day || [], cat = D.category || [];
+
+  document.getElementById('range').textContent = D.range || (dau.length ? dau[0].dt + ' ~ ' + dau[dau.length - 1].dt : '—');
+  document.getElementById('gen').textContent = D.generated_at || '—';
+  document.getElementById('src').textContent = D.source_desc || '—';
+  if (D.source === 'real') { document.getElementById('badge').textContent = '真实数据 1063 万行'; }
+
+  document.getElementById('k-dau').innerHTML = num(Math.round(avg(dau, 'dau')));
+  document.getElementById('k-orders').innerHTML = num(sum(trade, 'order_cnt'));
+  document.getElementById('k-aov').innerHTML = money(sum(trade, 'gmv') / sum(trade, 'order_cnt'));
+  document.getElementById('k-gmv').innerHTML = money(sum(trade, 'gmv'));
+  document.getElementById('k-conv').innerHTML = pct(avg(funnel, 'overall_rate'), 1);
+  document.getElementById('k-rep').innerHTML = pct(lastVal(rep, 'repurchase_rate'), 2);
+
+  var axisLabel = { color: C.muted, fontSize: 11.5 };
+  var splitLine = { lineStyle: { color: C.line } };
+  var gridBase = { left: 58, right: 22, top: 42, bottom: 34 };
+  var tip = {
+    backgroundColor: 'rgba(8,16,31,.94)',
+    borderColor: C.cyan, borderWidth: 1,
+    textStyle: { color: '#e8f2ff', fontSize: 12.5 }
+  };
+  var legendBase = { textStyle: { color: C.muted, fontSize: 11.5 }, itemWidth: 12, itemHeight: 8, top: 2 };
+
+  var charts = [];
+
+  /* 1. 转化漏斗（取最新一天，三环节） */
+  if (funnel.length) {
+    var f = funnel[funnel.length - 1];
+    var el = echarts.init(document.getElementById('c-funnel'));
+    el.setOption({
+      tooltip: Object.assign({ trigger: 'item', formatter: '{b}<br/>{c} 人' }, tip),
+      series: [{
+        type: 'funnel', left: 12, right: 12, top: 46, bottom: 8,
+        minSize: '34%', gap: 3,
+        /* ★ sort:'none' 不能省！
+           真实数据里「购买用户数 > 加购用户数」（用户可以不进购物车直接买，
+           实测 31 天里有 15 天如此）。ECharts 漏斗默认按数值降序重排，
+           会把「购买」画到「加购」前面，顺序就错了。
+           固定成 none，让三档严格保持 浏览 → 加购 → 购买 的业务顺序。 */
+        sort: 'none',
+        label: { color: '#e8f2ff', fontSize: 12, position: 'inside',
+                 formatter: function (p) { return p.name + '  ' + p.value; } },
+        itemStyle: { borderWidth: 0 },
+        data: [
+          { name: '浏览', value: f.view_uv,     itemStyle: { color: C.cyan } },
+          { name: '加购', value: f.cart_uv,     itemStyle: { color: C.blue } },
+          { name: '购买', value: f.purchase_uv, itemStyle: { color: C.amber } }
+        ]
+      }]
+    });
+    charts.push(el);
+  }
+
+  /* 2. 用户转化趋势（按天，三条线） */
+  if (funnel.length) {
+    var dts = funnel.map(function (r) { return r.dt; });
+    function line(name, key, color) {
+      return {
+        name: name, type: 'line', smooth: true, symbolSize: 4,
+        lineStyle: { width: 2.4, color: color },
+        itemStyle: { color: color },
+        areaStyle: { opacity: .06, color: color },
+        data: funnel.map(function (r) { return r[key]; })
+      };
+    }
+    var el2 = echarts.init(document.getElementById('c-trend'));
+    el2.setOption({
+      tooltip: Object.assign({ trigger: 'axis' }, tip),
+      legend: Object.assign({ data: ['浏览', '加购', '购买'] }, legendBase),
+      grid: gridBase,
+      xAxis: { type: 'category', data: dts, boundaryGap: false,
+               axisLabel: Object.assign({}, axisLabel, { interval: 4 }),
+               axisLine: { lineStyle: { color: C.line } } },
+      yAxis: { type: 'value', axisLabel: axisLabel, splitLine: splitLine },
+      series: [
+        line('浏览', 'view_uv', C.cyan),
+        line('加购', 'cart_uv', C.blue),
+        line('购买', 'purchase_uv', C.amber)
+      ]
+    });
+    charts.push(el2);
+  }
+
+  /* 3. 热销商品 TOP15（横向柱状） */
+  if (sku.length) {
+    var rows = sku.slice().sort(function (a, b) { return b.gmv - a.gmv; });
+    var el3 = echarts.init(document.getElementById('c-sku'));
+    el3.setOption({
+      tooltip: Object.assign({
+        trigger: 'axis', axisPointer: { type: 'shadow' },
+        formatter: function (p) {
+          var r = rows[p[0].dataIndex];
+          return prodLabel(r) + '<br/>商品ID：' + r.product_id +
+                 '<br/>成交金额：¥' + Number(r.gmv).toLocaleString('zh-CN') +
+                 '<br/>成交件数：' + r.purchase_cnt + '<br/>买家数：' + r.buyer_cnt +
+                 '<br/>类目：' + r.category_l1 + ' / ' + r.category_l2;
+        }
+      }, tip),
+      grid: { left: 8, right: 62, top: 12, bottom: 8, containLabel: true },
+      xAxis: { type: 'value', axisLabel: Object.assign({}, axisLabel,
+               { formatter: function (v) { return (v / 1e4).toFixed(0) + '万'; } }),
+               splitLine: splitLine },
+      yAxis: { type: 'category', inverse: true,
+               data: rows.map(function (r) { return prodLabel(r); }),
+               axisLabel: Object.assign({}, axisLabel, { fontSize: 11 }),
+               axisLine: { lineStyle: { color: C.line } } },
+      series: [{
+        type: 'bar', barWidth: '62%',
+        label: { show: true, position: 'right', color: C.muted, fontSize: 11,
+                 formatter: function (p) { return (p.value / 1e4).toFixed(1) + '万'; } },
+        itemStyle: {
+          borderRadius: [0, 3, 3, 0],
+          color: new echarts.graphic.LinearGradient(0, 0, 1, 0,
+            [{ offset: 0, color: '#0b6ba8' }, { offset: 1, color: C.cyan }])
+        },
+        data: rows.map(function (r) { return Number(r.gmv); })
+      }]
+    });
+    charts.push(el3);
+  }
+
+  /* 4. 成交趋势（成交金额 + 客单价，双轴） */
+  if (trade.length) {
+    var tdts = trade.map(function (r) { return r.dt; });
+    var el4 = echarts.init(document.getElementById('c-gmv'));
+    el4.setOption({
+      tooltip: Object.assign({
+        trigger: 'axis',
+        formatter: function (ps) {
+          var s = ps[0].axisValue + '<br/>';
+          ps.forEach(function (p) {
+            s += p.marker + p.seriesName + '：' +
+                 (p.seriesName === '客单价' ? ('¥' + Number(p.value).toFixed(2))
+                                            : ('¥' + Number(p.value).toLocaleString('zh-CN'))) + '<br/>';
+          });
+          return s;
+        }
+      }, tip),
+      legend: Object.assign({ data: ['成交金额', '客单价'] }, legendBase),
+      grid: gridBase,
+      xAxis: { type: 'category', data: tdts, boundaryGap: false,
+               axisLabel: Object.assign({}, axisLabel, { interval: 4 }),
+               axisLine: { lineStyle: { color: C.line } } },
+      yAxis: [
+        { type: 'value', name: 'GMV', nameTextStyle: { color: C.muted, fontSize: 11 },
+          axisLabel: Object.assign({}, axisLabel,
+            { formatter: function (v) { return (v / 1e4).toFixed(0) + '万'; } }), splitLine: splitLine },
+        { type: 'value', name: '客单价', nameTextStyle: { color: C.muted, fontSize: 11 },
+          axisLabel: Object.assign({}, axisLabel,
+            { formatter: function (v) { return v.toFixed(0); } }), splitLine: { show: false } }
+      ],
+      series: [
+        { name: '成交金额', type: 'line', smooth: true, symbolSize: 4, yAxisIndex: 0,
+          lineStyle: { width: 2.4, color: C.cyan }, itemStyle: { color: C.cyan },
+          areaStyle: { opacity: .10, color: C.cyan },
+          data: trade.map(function (r) { return Number(r.gmv); }) },
+        { name: '客单价', type: 'line', smooth: true, symbolSize: 4, yAxisIndex: 1,
+          lineStyle: { width: 2, color: C.amber, type: 'dashed' }, itemStyle: { color: C.amber },
+          data: trade.map(function (r) { return Number(r.avg_order_amount); }) }
+      ]
+    });
+    charts.push(el4);
+  }
+
+  /* 5. 用户构成（新增 / 连续活跃 / 回流，堆叠柱） */
+  if (dau.length) {
+    var udts = dau.map(function (r) { return r.dt; });
+    function ubar(name, key, color) {
+      return { name: name, type: 'bar', stack: 'u', barWidth: '48%',
+               itemStyle: { color: color },
+               data: dau.map(function (r) { return Number(r[key]); }) };
+    }
+    var el5 = echarts.init(document.getElementById('c-user'));
+    el5.setOption({
+      tooltip: Object.assign({ trigger: 'axis', axisPointer: { type: 'shadow' } }, tip),
+      legend: Object.assign({ data: ['新增用户', '连续活跃', '回流用户'] }, legendBase),
+      grid: { left: 58, right: 22, top: 42, bottom: 30 },
+      xAxis: { type: 'category', data: udts,
+               axisLabel: Object.assign({}, axisLabel, { interval: 4 }),
+               axisLine: { lineStyle: { color: C.line } } },
+      yAxis: { type: 'value', axisLabel: axisLabel, splitLine: splitLine },
+      series: [
+        ubar('新增用户', 'new_dau', C.teal),
+        ubar('连续活跃', 'active_dau', C.blue),
+        ubar('回流用户', 'wakeup_dau', C.purple)
+      ]
+    });
+    charts.push(el5);
+  }
+
+  /* 6. 一级类目 GMV 构成（全月累计，横向柱状）—— 新链路独有 */
+  if (cat.length) {
+    var crows = cat.slice().sort(function (a, b) { return b.gmv - a.gmv; });
+    var total = crows.reduce(function (s, r) { return s + Number(r.gmv || 0); }, 0);
+    var el6 = echarts.init(document.getElementById('c-cat'));
+    el6.setOption({
+      tooltip: Object.assign({
+        trigger: 'axis', axisPointer: { type: 'shadow' },
+        formatter: function (p) {
+          var r = crows[p[0].dataIndex];
+          var share = total ? (Number(r.gmv) / total * 100).toFixed(1) : '0';
+          return r.category_l1 + '<br/>成交金额：¥' + Number(r.gmv).toLocaleString('zh-CN') +
+                 '<br/>成交件数：' + r.purchase_cnt + '<br/>占比：' + share + '%';
+        }
+      }, tip),
+      grid: { left: 8, right: 78, top: 12, bottom: 8, containLabel: true },
+      xAxis: { type: 'value', axisLabel: Object.assign({}, axisLabel,
+               { formatter: function (v) { return (v / 1e4).toFixed(0) + '万'; } }),
+               splitLine: splitLine },
+      yAxis: { type: 'category', inverse: true,
+               data: crows.map(function (r) { return r.category_l1; }),
+               axisLabel: Object.assign({}, axisLabel, { fontSize: 11.5 }),
+               axisLine: { lineStyle: { color: C.line } } },
+      series: [{
+        type: 'bar', barWidth: '55%',
+        label: { show: true, position: 'right', color: C.muted, fontSize: 11,
+                 formatter: function (p) {
+                   var share = total ? (p.value / total * 100).toFixed(1) : '0';
+                   return (p.value / 1e4).toFixed(1) + '万  (' + share + '%)';
+                 } },
+        itemStyle: {
+          borderRadius: [0, 3, 3, 0],
+          color: new echarts.graphic.LinearGradient(0, 0, 1, 0,
+            [{ offset: 0, color: '#0f766e' }, { offset: 1, color: C.teal }])
+        },
+        data: crows.map(function (r) { return Number(r.gmv); })
+      }]
+    });
+    charts.push(el6);
+  }
+
+  window.addEventListener('resize', function () {
+    charts.forEach(function (c) { c.resize(); });
+  });
+})();
+</script>
+</body>
+</html>

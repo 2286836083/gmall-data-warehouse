@@ -1,0 +1,411 @@
+SLF4J: Class path contains multiple SLF4J bindings.
+SLF4J: Found binding in [jar:file:/opt/hive/lib/log4j-slf4j-impl-2.17.1.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/opt/hadoop-3.3.6/share/hadoop/common/lib/slf4j-reload4j-1.7.36.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J: Actual binding is of type [org.apache.logging.slf4j.Log4jLoggerFactory]
+Connecting to jdbc:hive2://localhost:10000
+Connected to: Apache Hive (version 3.1.3)
+Driver: Hive JDBC (version 3.1.3)
+Transaction isolation: TRANSACTION_REPEATABLE_READ
+0: jdbc:hive2://localhost:10000> USE gmall;
+INFO  : Compiling command(queryId=hadoop_20260901134005_bab8a980-5f89-45da-8145-55fe187af646): USE gmall
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:null, properties:null)
+INFO  : Completed compiling command(queryId=hadoop_20260901134005_bab8a980-5f89-45da-8145-55fe187af646); Time taken: 0.032 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hadoop_20260901134005_bab8a980-5f89-45da-8145-55fe187af646): USE gmall
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hadoop_20260901134005_bab8a980-5f89-45da-8145-55fe187af646); Time taken: 0.005 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
+No rows affected (0.063 seconds)
+0: jdbc:hive2://localhost:10000> SET hive.exec.mode.local.auto=false;
+No rows affected (0.002 seconds)
+0: jdbc:hive2://localhost:10000> SELECT 'DWD_user_behavior' t, COUNT(*) c FROM dwd_user_behavior_di;
+INFO  : Compiling command(queryId=hadoop_20260901134005_bece2dc2-5892-47fb-8590-37b952aa2cd9): SELECT 'DWD_user_behavior' t, COUNT(*) c FROM dwd_user_behavior_di
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:t, type:string, comment:null), FieldSchema(name:c, type:bigint, comment:null)], properties:null)
+INFO  : Completed compiling command(queryId=hadoop_20260901134005_bece2dc2-5892-47fb-8590-37b952aa2cd9); Time taken: 0.084 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hadoop_20260901134005_bece2dc2-5892-47fb-8590-37b952aa2cd9): SELECT 'DWD_user_behavior' t, COUNT(*) c FROM dwd_user_behavior_di
+INFO  : Completed executing command(queryId=hadoop_20260901134005_bece2dc2-5892-47fb-8590-37b952aa2cd9); Time taken: 0.0 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
++--------------------+---------+
+|         t          |    c    |
++--------------------+---------+
+| DWD_user_behavior  | 100000  |
++--------------------+---------+
+1 row selected (0.112 seconds)
+0: jdbc:hive2://localhost:10000> SELECT 'DWD_order_fact' t, COUNT(*) c FROM dwd_order_fact_di;
+INFO  : Compiling command(queryId=hadoop_20260901134006_9fcfd5cc-d804-4d28-9c99-cf6ff593cb22): SELECT 'DWD_order_fact' t, COUNT(*) c FROM dwd_order_fact_di
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:t, type:string, comment:null), FieldSchema(name:c, type:bigint, comment:null)], properties:null)
+INFO  : Completed compiling command(queryId=hadoop_20260901134006_9fcfd5cc-d804-4d28-9c99-cf6ff593cb22); Time taken: 0.086 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hadoop_20260901134006_9fcfd5cc-d804-4d28-9c99-cf6ff593cb22): SELECT 'DWD_order_fact' t, COUNT(*) c FROM dwd_order_fact_di
+INFO  : Completed executing command(queryId=hadoop_20260901134006_9fcfd5cc-d804-4d28-9c99-cf6ff593cb22); Time taken: 0.0 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
++-----------------+--------+
+|        t        |   c    |
++-----------------+--------+
+| DWD_order_fact  | 50000  |
++-----------------+--------+
+1 row selected (0.098 seconds)
+0: jdbc:hive2://localhost:10000> SELECT 'DWD_beh_part' t, COUNT(DISTINCT dt) c FROM dwd_user_behavior_di;
+INFO  : Compiling command(queryId=hadoop_20260901134006_7a5d4837-1c9e-4bf3-8a99-ec26ed095d63): SELECT 'DWD_beh_part' t, COUNT(DISTINCT dt) c FROM dwd_user_behavior_di
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:t, type:string, comment:null), FieldSchema(name:c, type:bigint, comment:null)], properties:null)
+INFO  : Completed compiling command(queryId=hadoop_20260901134006_7a5d4837-1c9e-4bf3-8a99-ec26ed095d63); Time taken: 0.093 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hadoop_20260901134006_7a5d4837-1c9e-4bf3-8a99-ec26ed095d63): SELECT 'DWD_beh_part' t, COUNT(DISTINCT dt) c FROM dwd_user_behavior_di
+WARN  : Hive-on-MR is deprecated in Hive 2 and may not be available in the future versions. Consider using a different execution engine (i.e. spark, tez) or using Hive 1.X releases.
+INFO  : Query ID = hadoop_20260901134006_7a5d4837-1c9e-4bf3-8a99-ec26ed095d63
+INFO  : Total jobs = 1
+INFO  : Launching Job 1 out of 1
+INFO  : Starting task [Stage-1:MAPRED] in serial mode
+INFO  : Number of reduce tasks determined at compile time: 1
+INFO  : In order to change the average load for a reducer (in bytes):
+INFO  :   set hive.exec.reducers.bytes.per.reducer=<number>
+INFO  : In order to limit the maximum number of reducers:
+INFO  :   set hive.exec.reducers.max=<number>
+INFO  : In order to set a constant number of reducers:
+INFO  :   set mapreduce.job.reduces=<number>
+INFO  : number of splits:1
+INFO  : Submitting tokens for job: job_1788239956390_0047
+INFO  : Executing with tokens: []
+INFO  : The url to track the job: http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0047/
+INFO  : Starting Job = job_1788239956390_0047, Tracking URL = http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0047/
+INFO  : Kill Command = /opt/hadoop-3.3.6/bin/mapred job  -kill job_1788239956390_0047
+INFO  : Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+INFO  : 2026-09-01 13:40:11,861 Stage-1 map = 0%,  reduce = 0%
+INFO  : 2026-09-01 13:40:16,963 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 4.76 sec
+INFO  : 2026-09-01 13:40:21,023 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 6.05 sec
+INFO  : MapReduce Total cumulative CPU time: 6 seconds 50 msec
+INFO  : Ended Job = job_1788239956390_0047
+INFO  : MapReduce Jobs Launched: 
+INFO  : Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 6.05 sec   HDFS Read: 7818191 HDFS Write: 114 SUCCESS
+INFO  : Total MapReduce CPU Time Spent: 6 seconds 50 msec
+INFO  : Completed executing command(queryId=hadoop_20260901134006_7a5d4837-1c9e-4bf3-8a99-ec26ed095d63); Time taken: 15.72 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
++---------------+----+
+|       t       | c  |
++---------------+----+
+| DWD_beh_part  | 5  |
++---------------+----+
+1 row selected (15.83 seconds)
+0: jdbc:hive2://localhost:10000> SELECT 'DWD_order_part' t, COUNT(DISTINCT dt) c FROM dwd_order_fact_di;
+INFO  : Compiling command(queryId=hadoop_20260901134022_28ae1fcb-6c21-4cc3-b28d-ea254e2038ed): SELECT 'DWD_order_part' t, COUNT(DISTINCT dt) c FROM dwd_order_fact_di
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:t, type:string, comment:null), FieldSchema(name:c, type:bigint, comment:null)], properties:null)
+INFO  : Completed compiling command(queryId=hadoop_20260901134022_28ae1fcb-6c21-4cc3-b28d-ea254e2038ed); Time taken: 0.094 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hadoop_20260901134022_28ae1fcb-6c21-4cc3-b28d-ea254e2038ed): SELECT 'DWD_order_part' t, COUNT(DISTINCT dt) c FROM dwd_order_fact_di
+WARN  : Hive-on-MR is deprecated in Hive 2 and may not be available in the future versions. Consider using a different execution engine (i.e. spark, tez) or using Hive 1.X releases.
+INFO  : Query ID = hadoop_20260901134022_28ae1fcb-6c21-4cc3-b28d-ea254e2038ed
+INFO  : Total jobs = 1
+INFO  : Launching Job 1 out of 1
+INFO  : Starting task [Stage-1:MAPRED] in serial mode
+INFO  : Number of reduce tasks determined at compile time: 1
+INFO  : In order to change the average load for a reducer (in bytes):
+INFO  :   set hive.exec.reducers.bytes.per.reducer=<number>
+INFO  : In order to limit the maximum number of reducers:
+INFO  :   set hive.exec.reducers.max=<number>
+INFO  : In order to set a constant number of reducers:
+INFO  :   set mapreduce.job.reduces=<number>
+INFO  : number of splits:1
+INFO  : Submitting tokens for job: job_1788239956390_0048
+INFO  : Executing with tokens: []
+INFO  : The url to track the job: http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0048/
+INFO  : Starting Job = job_1788239956390_0048, Tracking URL = http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0048/
+INFO  : Kill Command = /opt/hadoop-3.3.6/bin/mapred job  -kill job_1788239956390_0048
+INFO  : Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+INFO  : 2026-09-01 13:40:32,128 Stage-1 map = 0%,  reduce = 0%
+INFO  : 2026-09-01 13:40:37,213 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 4.88 sec
+INFO  : 2026-09-01 13:40:41,275 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 6.19 sec
+INFO  : MapReduce Total cumulative CPU time: 6 seconds 190 msec
+INFO  : Ended Job = job_1788239956390_0048
+INFO  : MapReduce Jobs Launched: 
+INFO  : Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 6.19 sec   HDFS Read: 3820928 HDFS Write: 116 SUCCESS
+INFO  : Total MapReduce CPU Time Spent: 6 seconds 190 msec
+INFO  : Completed executing command(queryId=hadoop_20260901134022_28ae1fcb-6c21-4cc3-b28d-ea254e2038ed); Time taken: 20.105 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
++-----------------+----+
+|        t        | c  |
++-----------------+----+
+| DWD_order_part  | 5  |
++-----------------+----+
+1 row selected (20.215 seconds)
+0: jdbc:hive2://localhost:10000> SELECT '空user' t, COUNT(*) c FROM dwd_user_behavior_di WHERE user_id IS NULL  OR user_id='';
+INFO  : Compiling command(queryId=hadoop_20260901134042_5382b1df-35e7-4d09-aecd-732ef1e07230): SELECT '空user' t, COUNT(*) c FROM dwd_user_behavior_di WHERE user_id IS NULL OR user_id=''
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:t, type:string, comment:null), FieldSchema(name:c, type:bigint, comment:null)], properties:null)
+INFO  : Completed compiling command(queryId=hadoop_20260901134042_5382b1df-35e7-4d09-aecd-732ef1e07230); Time taken: 0.091 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hadoop_20260901134042_5382b1df-35e7-4d09-aecd-732ef1e07230): SELECT '空user' t, COUNT(*) c FROM dwd_user_behavior_di WHERE user_id IS NULL OR user_id=''
+WARN  : Hive-on-MR is deprecated in Hive 2 and may not be available in the future versions. Consider using a different execution engine (i.e. spark, tez) or using Hive 1.X releases.
+INFO  : Query ID = hadoop_20260901134042_5382b1df-35e7-4d09-aecd-732ef1e07230
+INFO  : Total jobs = 1
+INFO  : Launching Job 1 out of 1
+INFO  : Starting task [Stage-1:MAPRED] in serial mode
+INFO  : Number of reduce tasks determined at compile time: 1
+INFO  : In order to change the average load for a reducer (in bytes):
+INFO  :   set hive.exec.reducers.bytes.per.reducer=<number>
+INFO  : In order to limit the maximum number of reducers:
+INFO  :   set hive.exec.reducers.max=<number>
+INFO  : In order to set a constant number of reducers:
+INFO  :   set mapreduce.job.reduces=<number>
+INFO  : number of splits:1
+INFO  : Submitting tokens for job: job_1788239956390_0049
+INFO  : Executing with tokens: []
+INFO  : The url to track the job: http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0049/
+INFO  : Starting Job = job_1788239956390_0049, Tracking URL = http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0049/
+INFO  : Kill Command = /opt/hadoop-3.3.6/bin/mapred job  -kill job_1788239956390_0049
+INFO  : Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+INFO  : 2026-09-01 13:40:52,161 Stage-1 map = 0%,  reduce = 0%
+INFO  : 2026-09-01 13:40:57,255 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 4.87 sec
+INFO  : 2026-09-01 13:41:01,321 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 6.3 sec
+INFO  : MapReduce Total cumulative CPU time: 6 seconds 300 msec
+INFO  : Ended Job = job_1788239956390_0049
+INFO  : MapReduce Jobs Launched: 
+INFO  : Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 6.3 sec   HDFS Read: 7824168 HDFS Write: 112 SUCCESS
+INFO  : Total MapReduce CPU Time Spent: 6 seconds 300 msec
+INFO  : Completed executing command(queryId=hadoop_20260901134042_5382b1df-35e7-4d09-aecd-732ef1e07230); Time taken: 20.923 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
++--------+----+
+|   t    | c  |
++--------+----+
+| 空user  | 0  |
++--------+----+
+1 row selected (21.033 seconds)
+0: jdbc:hive2://localhost:10000> SELECT 'event_types' t, COUNT(*) c FROM (SELECT DISTINCT event_type FROM dwd _user_behavior_di) x;
+INFO  : Compiling command(queryId=hadoop_20260901134103_6984dcfa-5670-4c5d-84a7-afc93594cdbe): SELECT 'event_types' t, COUNT(*) c FROM (SELECT DISTINCT event_type FROM dwd_user_behavior_di) x
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:t, type:string, comment:null), FieldSchema(name:c, type:bigint, comment:null)], properties:null)
+INFO  : Completed compiling command(queryId=hadoop_20260901134103_6984dcfa-5670-4c5d-84a7-afc93594cdbe); Time taken: 0.115 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hadoop_20260901134103_6984dcfa-5670-4c5d-84a7-afc93594cdbe): SELECT 'event_types' t, COUNT(*) c FROM (SELECT DISTINCT event_type FROM dwd_user_behavior_di) x
+WARN  : Hive-on-MR is deprecated in Hive 2 and may not be available in the future versions. Consider using a different execution engine (i.e. spark, tez) or using Hive 1.X releases.
+INFO  : Query ID = hadoop_20260901134103_6984dcfa-5670-4c5d-84a7-afc93594cdbe
+INFO  : Total jobs = 2
+INFO  : Launching Job 1 out of 2
+INFO  : Starting task [Stage-1:MAPRED] in serial mode
+INFO  : Number of reduce tasks not specified. Estimated from input data size: 1
+INFO  : In order to change the average load for a reducer (in bytes):
+INFO  :   set hive.exec.reducers.bytes.per.reducer=<number>
+INFO  : In order to limit the maximum number of reducers:
+INFO  :   set hive.exec.reducers.max=<number>
+INFO  : In order to set a constant number of reducers:
+INFO  :   set mapreduce.job.reduces=<number>
+INFO  : number of splits:1
+INFO  : Submitting tokens for job: job_1788239956390_0050
+INFO  : Executing with tokens: []
+INFO  : The url to track the job: http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0050/
+INFO  : Starting Job = job_1788239956390_0050, Tracking URL = http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0050/
+INFO  : Kill Command = /opt/hadoop-3.3.6/bin/mapred job  -kill job_1788239956390_0050
+INFO  : Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+INFO  : 2026-09-01 13:41:13,035 Stage-1 map = 0%,  reduce = 0%
+INFO  : 2026-09-01 13:41:17,105 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 4.18 sec
+INFO  : 2026-09-01 13:41:21,166 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 5.41 sec
+INFO  : MapReduce Total cumulative CPU time: 5 seconds 410 msec
+INFO  : Ended Job = job_1788239956390_0050
+INFO  : Launching Job 2 out of 2
+INFO  : Starting task [Stage-2:MAPRED] in serial mode
+INFO  : Number of reduce tasks determined at compile time: 1
+INFO  : In order to change the average load for a reducer (in bytes):
+INFO  :   set hive.exec.reducers.bytes.per.reducer=<number>
+INFO  : In order to limit the maximum number of reducers:
+INFO  :   set hive.exec.reducers.max=<number>
+INFO  : In order to set a constant number of reducers:
+INFO  :   set mapreduce.job.reduces=<number>
+INFO  : number of splits:1
+INFO  : Submitting tokens for job: job_1788239956390_0051
+INFO  : Executing with tokens: []
+INFO  : The url to track the job: http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0051/
+INFO  : Starting Job = job_1788239956390_0051, Tracking URL = http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0051/
+INFO  : Kill Command = /opt/hadoop-3.3.6/bin/mapred job  -kill job_1788239956390_0051
+INFO  : Hadoop job information for Stage-2: number of mappers: 1; number of reducers: 1
+INFO  : 2026-09-01 13:41:32,729 Stage-2 map = 0%,  reduce = 0%
+INFO  : 2026-09-01 13:41:36,796 Stage-2 map = 100%,  reduce = 0%, Cumulative CPU 3.92 sec
+INFO  : 2026-09-01 13:41:41,869 Stage-2 map = 100%,  reduce = 100%, Cumulative CPU 5.22 sec
+INFO  : MapReduce Total cumulative CPU time: 5 seconds 220 msec
+INFO  : Ended Job = job_1788239956390_0051
+INFO  : MapReduce Jobs Launched: 
+INFO  : Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 5.41 sec   HDFS Read: 7820697 HDFS Write: 114 SUCCESS
+INFO  : Stage-Stage-2: Map: 1  Reduce: 1   Cumulative CPU: 5.22 sec   HDFS Read: 7569 HDFS Write: 113 SUCCESS
+INFO  : Total MapReduce CPU Time Spent: 10 seconds 630 msec
+INFO  : Completed executing command(queryId=hadoop_20260901134103_6984dcfa-5670-4c5d-84a7-afc93594cdbe); Time taken: 39.358 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
++--------------+----+
+|      t       | c  |
++--------------+----+
+| event_types  | 4  |
++--------------+----+
+1 row selected (39.49 seconds)
+0: jdbc:hive2://localhost:10000> SELECT '未关联category' t, COUNT(*) c FROM dwd_user_behavior_di WHERE category_ id='unknown';
+INFO  : Compiling command(queryId=hadoop_20260901134142_73505225-7e9f-4a0d-babe-d0b53b99701b): SELECT '未关联category' t, COUNT(*) c FROM dwd_user_behavior_di WHERE category_id='unknown'
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:t, type:string, comment:null), FieldSchema(name:c, type:bigint, comment:null)], properties:null)
+INFO  : Completed compiling command(queryId=hadoop_20260901134142_73505225-7e9f-4a0d-babe-d0b53b99701b); Time taken: 0.088 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hadoop_20260901134142_73505225-7e9f-4a0d-babe-d0b53b99701b): SELECT '未关联category' t, COUNT(*) c FROM dwd_user_behavior_di WHERE category_id='unknown'
+WARN  : Hive-on-MR is deprecated in Hive 2 and may not be available in the future versions. Consider using a different execution engine (i.e. spark, tez) or using Hive 1.X releases.
+INFO  : Query ID = hadoop_20260901134142_73505225-7e9f-4a0d-babe-d0b53b99701b
+INFO  : Total jobs = 1
+INFO  : Launching Job 1 out of 1
+INFO  : Starting task [Stage-1:MAPRED] in serial mode
+INFO  : Number of reduce tasks determined at compile time: 1
+INFO  : In order to change the average load for a reducer (in bytes):
+INFO  :   set hive.exec.reducers.bytes.per.reducer=<number>
+INFO  : In order to limit the maximum number of reducers:
+INFO  :   set hive.exec.reducers.max=<number>
+INFO  : In order to set a constant number of reducers:
+INFO  :   set mapreduce.job.reduces=<number>
+INFO  : number of splits:1
+INFO  : Submitting tokens for job: job_1788239956390_0052
+INFO  : Executing with tokens: []
+INFO  : The url to track the job: http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0052/
+INFO  : Starting Job = job_1788239956390_0052, Tracking URL = http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0052/
+INFO  : Kill Command = /opt/hadoop-3.3.6/bin/mapred job  -kill job_1788239956390_0052
+INFO  : Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+INFO  : 2026-09-01 13:41:52,354 Stage-1 map = 0%,  reduce = 0%
+INFO  : 2026-09-01 13:41:57,433 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 5.03 sec
+INFO  : 2026-09-01 13:42:01,496 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 6.52 sec
+INFO  : MapReduce Total cumulative CPU time: 6 seconds 520 msec
+INFO  : Ended Job = job_1788239956390_0052
+INFO  : MapReduce Jobs Launched: 
+INFO  : Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 6.52 sec   HDFS Read: 7823535 HDFS Write: 128 SUCCESS
+INFO  : Total MapReduce CPU Time Spent: 6 seconds 520 msec
+INFO  : Completed executing command(queryId=hadoop_20260901134142_73505225-7e9f-4a0d-babe-d0b53b99701b); Time taken: 19.487 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
++--------------+----+
+|      t       | c  |
++--------------+----+
+| 未关联category  | 0  |
++--------------+----+
+1 row selected (19.59 seconds)
+0: jdbc:hive2://localhost:10000> SELECT 'order_status' t, COUNT(*) c FROM (SELECT DISTINCT order_status FROM  dwd_order_fact_di) x;
+INFO  : Compiling command(queryId=hadoop_20260901134202_4ff6aa02-e996-4439-83c1-0be665506d2c): SELECT 'order_status' t, COUNT(*) c FROM (SELECT DISTINCT order_status FROM dwd_order_fact_di) x
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:t, type:string, comment:null), FieldSchema(name:c, type:bigint, comment:null)], properties:null)
+INFO  : Completed compiling command(queryId=hadoop_20260901134202_4ff6aa02-e996-4439-83c1-0be665506d2c); Time taken: 0.09 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hadoop_20260901134202_4ff6aa02-e996-4439-83c1-0be665506d2c): SELECT 'order_status' t, COUNT(*) c FROM (SELECT DISTINCT order_status FROM dwd_order_fact_di) x
+WARN  : Hive-on-MR is deprecated in Hive 2 and may not be available in the future versions. Consider using a different execution engine (i.e. spark, tez) or using Hive 1.X releases.
+INFO  : Query ID = hadoop_20260901134202_4ff6aa02-e996-4439-83c1-0be665506d2c
+INFO  : Total jobs = 2
+INFO  : Launching Job 1 out of 2
+INFO  : Starting task [Stage-1:MAPRED] in serial mode
+INFO  : Number of reduce tasks not specified. Estimated from input data size: 1
+INFO  : In order to change the average load for a reducer (in bytes):
+INFO  :   set hive.exec.reducers.bytes.per.reducer=<number>
+INFO  : In order to limit the maximum number of reducers:
+INFO  :   set hive.exec.reducers.max=<number>
+INFO  : In order to set a constant number of reducers:
+INFO  :   set mapreduce.job.reduces=<number>
+INFO  : number of splits:1
+INFO  : Submitting tokens for job: job_1788239956390_0053
+INFO  : Executing with tokens: []
+INFO  : The url to track the job: http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0053/
+INFO  : Starting Job = job_1788239956390_0053, Tracking URL = http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0053/
+INFO  : Kill Command = /opt/hadoop-3.3.6/bin/mapred job  -kill job_1788239956390_0053
+INFO  : Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+INFO  : 2026-09-01 13:42:12,956 Stage-1 map = 0%,  reduce = 0%
+INFO  : 2026-09-01 13:42:17,024 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 4.19 sec
+INFO  : 2026-09-01 13:42:21,089 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 5.44 sec
+INFO  : MapReduce Total cumulative CPU time: 5 seconds 440 msec
+INFO  : Ended Job = job_1788239956390_0053
+INFO  : Launching Job 2 out of 2
+INFO  : Starting task [Stage-2:MAPRED] in serial mode
+INFO  : Number of reduce tasks determined at compile time: 1
+INFO  : In order to change the average load for a reducer (in bytes):
+INFO  :   set hive.exec.reducers.bytes.per.reducer=<number>
+INFO  : In order to limit the maximum number of reducers:
+INFO  :   set hive.exec.reducers.max=<number>
+INFO  : In order to set a constant number of reducers:
+INFO  :   set mapreduce.job.reduces=<number>
+INFO  : number of splits:1
+INFO  : Submitting tokens for job: job_1788239956390_0054
+INFO  : Executing with tokens: []
+INFO  : The url to track the job: http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0054/
+INFO  : Starting Job = job_1788239956390_0054, Tracking URL = http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0054/
+INFO  : Kill Command = /opt/hadoop-3.3.6/bin/mapred job  -kill job_1788239956390_0054
+INFO  : Hadoop job information for Stage-2: number of mappers: 1; number of reducers: 1
+INFO  : 2026-09-01 13:42:32,666 Stage-2 map = 0%,  reduce = 0%
+INFO  : 2026-09-01 13:42:36,743 Stage-2 map = 100%,  reduce = 0%, Cumulative CPU 3.9 sec
+INFO  : 2026-09-01 13:42:41,818 Stage-2 map = 100%,  reduce = 100%, Cumulative CPU 5.19 sec
+INFO  : MapReduce Total cumulative CPU time: 5 seconds 190 msec
+INFO  : Ended Job = job_1788239956390_0054
+INFO  : MapReduce Jobs Launched: 
+INFO  : Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 5.44 sec   HDFS Read: 3823442 HDFS Write: 114 SUCCESS
+INFO  : Stage-Stage-2: Map: 1  Reduce: 1   Cumulative CPU: 5.19 sec   HDFS Read: 7571 HDFS Write: 114 SUCCESS
+INFO  : Total MapReduce CPU Time Spent: 10 seconds 630 msec
+INFO  : Completed executing command(queryId=hadoop_20260901134202_4ff6aa02-e996-4439-83c1-0be665506d2c); Time taken: 40.186 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
++---------------+----+
+|       t       | c  |
++---------------+----+
+| order_status  | 4  |
++---------------+----+
+1 row selected (40.293 seconds)
+0: jdbc:hive2://localhost:10000> SELECT 'is_paid_1' t, COUNT(*) c FROM dwd_order_fact_di WHERE is_paid=1;
+INFO  : Compiling command(queryId=hadoop_20260901134242_edcb4623-17e6-47e7-9e81-f500b98df009): SELECT 'is_paid_1' t, COUNT(*) c FROM dwd_order_fact_di WHERE is_paid=1
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:t, type:string, comment:null), FieldSchema(name:c, type:bigint, comment:null)], properties:null)
+INFO  : Completed compiling command(queryId=hadoop_20260901134242_edcb4623-17e6-47e7-9e81-f500b98df009); Time taken: 0.105 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hadoop_20260901134242_edcb4623-17e6-47e7-9e81-f500b98df009): SELECT 'is_paid_1' t, COUNT(*) c FROM dwd_order_fact_di WHERE is_paid=1
+WARN  : Hive-on-MR is deprecated in Hive 2 and may not be available in the future versions. Consider using a different execution engine (i.e. spark, tez) or using Hive 1.X releases.
+INFO  : Query ID = hadoop_20260901134242_edcb4623-17e6-47e7-9e81-f500b98df009
+INFO  : Total jobs = 1
+INFO  : Launching Job 1 out of 1
+INFO  : Starting task [Stage-1:MAPRED] in serial mode
+INFO  : Number of reduce tasks determined at compile time: 1
+INFO  : In order to change the average load for a reducer (in bytes):
+INFO  :   set hive.exec.reducers.bytes.per.reducer=<number>
+INFO  : In order to limit the maximum number of reducers:
+INFO  :   set hive.exec.reducers.max=<number>
+INFO  : In order to set a constant number of reducers:
+INFO  :   set mapreduce.job.reduces=<number>
+INFO  : number of splits:1
+INFO  : Submitting tokens for job: job_1788239956390_0055
+INFO  : Executing with tokens: []
+INFO  : The url to track the job: http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0055/
+INFO  : Starting Job = job_1788239956390_0055, Tracking URL = http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0055/
+INFO  : Kill Command = /opt/hadoop-3.3.6/bin/mapred job  -kill job_1788239956390_0055
+INFO  : Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+INFO  : 2026-09-01 13:42:52,707 Stage-1 map = 0%,  reduce = 0%
+INFO  : 2026-09-01 13:42:57,804 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 5.22 sec
+INFO  : 2026-09-01 13:43:01,873 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 6.84 sec
+INFO  : MapReduce Total cumulative CPU time: 6 seconds 840 msec
+INFO  : Ended Job = job_1788239956390_0055
+INFO  : MapReduce Jobs Launched: 
+INFO  : Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 6.84 sec   HDFS Read: 3826227 HDFS Write: 115 SUCCESS
+INFO  : Total MapReduce CPU Time Spent: 6 seconds 840 msec
+INFO  : Completed executing command(queryId=hadoop_20260901134242_edcb4623-17e6-47e7-9e81-f500b98df009); Time taken: 19.91 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
++------------+--------+
+|     t      |   c    |
++------------+--------+
+| is_paid_1  | 28506  |
++------------+--------+
+1 row selected (20.034 seconds)
+0: jdbc:hive2://localhost:10000> Closing: 0: jdbc:hive2://localhost:10000

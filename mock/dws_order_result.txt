@@ -1,0 +1,516 @@
+SLF4J: Class path contains multiple SLF4J bindings.
+SLF4J: Found binding in [jar:file:/opt/hive/lib/log4j-slf4j-impl-2.17.1.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/opt/hadoop-3.3.6/share/hadoop/common/lib/slf4j-reload4j-1.7.36.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J: Actual binding is of type [org.apache.logging.slf4j.Log4jLoggerFactory]
+Connecting to jdbc:hive2://localhost:10000
+Connected to: Apache Hive (version 3.1.3)
+Driver: Hive JDBC (version 3.1.3)
+Transaction isolation: TRANSACTION_REPEATABLE_READ
+0: jdbc:hive2://localhost:10000> USE gmall;
+INFO  : Compiling command(queryId=hadoop_20260901135223_ab28d3fb-2174-4fe1-a092-cdc67bed6d65): USE gmall
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:null, properties:null)
+INFO  : Completed compiling command(queryId=hadoop_20260901135223_ab28d3fb-2174-4fe1-a092-cdc67bed6d65); Time taken: 0.035 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hadoop_20260901135223_ab28d3fb-2174-4fe1-a092-cdc67bed6d65): USE gmall
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hadoop_20260901135223_ab28d3fb-2174-4fe1-a092-cdc67bed6d65); Time taken: 0.005 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
+No rows affected (0.07 seconds)
+0: jdbc:hive2://localhost:10000> SET hive.exec.mode.local.auto=false;
+No rows affected (0.003 seconds)
+0: jdbc:hive2://localhost:10000> 
+0: jdbc:hive2://localhost:10000> -- ============ dws_order_day : 订单主题宽表（5 天） ============
+0: jdbc:hive2://localhost:10000> INSERT OVERWRITE TABLE dws_order_day PARTITION (dt='2026-08-20')
+. . . . . . . . . . . . . . . .> SELECT
+. . . . . . . . . . . . . . . .>     COUNT(*) total_orders,
+. . . . . . . . . . . . . . . .>     SUM(CASE WHEN order_status='已支付' THEN 1 ELSE 0 END) paid_orders,
+. . . . . . . . . . . . . . . .>     SUM(CASE WHEN order_status='已取消' THEN 1 ELSE 0 END) cancelled_orders,
+. . . . . . . . . . . . . . . .>     SUM(CASE WHEN order_status='已退款' THEN 1 ELSE 0 END) refunded_orders,
+. . . . . . . . . . . . . . . .>     SUM(total_amount) total_amount,
+. . . . . . . . . . . . . . . .>     SUM(CASE WHEN is_paid=1 THEN total_amount ELSE 0 END) paid_amount,
+. . . . . . . . . . . . . . . .>     COUNT(DISTINCT user_id) unique_buyers,
+. . . . . . . . . . . . . . . .>     COUNT(DISTINCT CASE WHEN is_paid=1 THEN user_id END) unique_payers
+. . . . . . . . . . . . . . . .> FROM dwd_order_fact_di
+. . . . . . . . . . . . . . . .> WHERE dt='2026-08-20';
+INFO  : Compiling command(queryId=hadoop_20260901135223_0c3616f9-525e-4a6c-8390-b72ba7b0de2e): INSERT OVERWRITE TABLE dws_order_day PARTITION (dt='2026-08-20')
+SELECT
+COUNT(*) total_orders,
+SUM(CASE WHEN order_status='已支付' THEN 1 ELSE 0 END) paid_orders,
+SUM(CASE WHEN order_status='已取消' THEN 1 ELSE 0 END) cancelled_orders,
+SUM(CASE WHEN order_status='已退款' THEN 1 ELSE 0 END) refunded_orders,
+SUM(total_amount) total_amount,
+SUM(CASE WHEN is_paid=1 THEN total_amount ELSE 0 END) paid_amount,
+COUNT(DISTINCT user_id) unique_buyers,
+COUNT(DISTINCT CASE WHEN is_paid=1 THEN user_id END) unique_payers
+FROM dwd_order_fact_di
+WHERE dt='2026-08-20'
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:_col0, type:bigint, comment:null), FieldSchema(name:_col1, type:bigint, comment:null), FieldSchema(name:_col2, type:bigint, comment:null), FieldSchema(name:_col3, type:bigint, comment:null), FieldSchema(name:_col4, type:decimal(18,2), comment:null), FieldSchema(name:_col5, type:decimal(18,2), comment:null), FieldSchema(name:_col6, type:bigint, comment:null), FieldSchema(name:_col7, type:bigint, comment:null)], properties:null)
+INFO  : Completed compiling command(queryId=hadoop_20260901135223_0c3616f9-525e-4a6c-8390-b72ba7b0de2e); Time taken: 0.222 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hadoop_20260901135223_0c3616f9-525e-4a6c-8390-b72ba7b0de2e): INSERT OVERWRITE TABLE dws_order_day PARTITION (dt='2026-08-20')
+SELECT
+COUNT(*) total_orders,
+SUM(CASE WHEN order_status='已支付' THEN 1 ELSE 0 END) paid_orders,
+SUM(CASE WHEN order_status='已取消' THEN 1 ELSE 0 END) cancelled_orders,
+SUM(CASE WHEN order_status='已退款' THEN 1 ELSE 0 END) refunded_orders,
+SUM(total_amount) total_amount,
+SUM(CASE WHEN is_paid=1 THEN total_amount ELSE 0 END) paid_amount,
+COUNT(DISTINCT user_id) unique_buyers,
+COUNT(DISTINCT CASE WHEN is_paid=1 THEN user_id END) unique_payers
+FROM dwd_order_fact_di
+WHERE dt='2026-08-20'
+WARN  : Hive-on-MR is deprecated in Hive 2 and may not be available in the future versions. Consider using a different execution engine (i.e. spark, tez) or using Hive 1.X releases.
+INFO  : Query ID = hadoop_20260901135223_0c3616f9-525e-4a6c-8390-b72ba7b0de2e
+INFO  : Total jobs = 2
+INFO  : Launching Job 1 out of 2
+INFO  : Starting task [Stage-1:MAPRED] in serial mode
+INFO  : Number of reduce tasks determined at compile time: 1
+INFO  : In order to change the average load for a reducer (in bytes):
+INFO  :   set hive.exec.reducers.bytes.per.reducer=<number>
+INFO  : In order to limit the maximum number of reducers:
+INFO  :   set hive.exec.reducers.max=<number>
+INFO  : In order to set a constant number of reducers:
+INFO  :   set mapreduce.job.reduces=<number>
+INFO  : number of splits:1
+INFO  : Submitting tokens for job: job_1788239956390_0076
+INFO  : Executing with tokens: []
+INFO  : The url to track the job: http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0076/
+INFO  : Starting Job = job_1788239956390_0076, Tracking URL = http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0076/
+INFO  : Kill Command = /opt/hadoop-3.3.6/bin/mapred job  -kill job_1788239956390_0076
+INFO  : Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+INFO  : 2026-09-01 13:52:31,304 Stage-1 map = 0%,  reduce = 0%
+INFO  : 2026-09-01 13:52:35,392 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 4.96 sec
+INFO  : 2026-09-01 13:52:40,476 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 7.16 sec
+INFO  : MapReduce Total cumulative CPU time: 7 seconds 160 msec
+INFO  : Ended Job = job_1788239956390_0076
+INFO  : Starting task [Stage-0:MOVE] in serial mode
+INFO  : Loading data to table gmall.dws_order_day partition (dt=2026-08-20) from hdfs://localhost:9000/user/hive/warehouse/gmall.db/dws_order_day/dt=2026-08-20/.hive-staging_hive_2026-09-01_13-52-23_566_377651981536075304-8/-ext-10000
+INFO  : Launching Job 2 out of 2
+INFO  : Starting task [Stage-3:MAPRED] in serial mode
+INFO  : Number of reduce tasks not specified. Estimated from input data size: 1
+INFO  : In order to change the average load for a reducer (in bytes):
+INFO  :   set hive.exec.reducers.bytes.per.reducer=<number>
+INFO  : In order to limit the maximum number of reducers:
+INFO  :   set hive.exec.reducers.max=<number>
+INFO  : In order to set a constant number of reducers:
+INFO  :   set mapreduce.job.reduces=<number>
+INFO  : number of splits:1
+INFO  : Submitting tokens for job: job_1788239956390_0077
+INFO  : Executing with tokens: []
+INFO  : The url to track the job: http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0077/
+INFO  : Starting Job = job_1788239956390_0077, Tracking URL = http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0077/
+INFO  : Kill Command = /opt/hadoop-3.3.6/bin/mapred job  -kill job_1788239956390_0077
+INFO  : Hadoop job information for Stage-3: number of mappers: 1; number of reducers: 1
+INFO  : 2026-09-01 13:52:51,510 Stage-3 map = 0%,  reduce = 0%
+INFO  : 2026-09-01 13:52:55,580 Stage-3 map = 100%,  reduce = 0%, Cumulative CPU 3.96 sec
+INFO  : 2026-09-01 13:53:00,661 Stage-3 map = 100%,  reduce = 100%, Cumulative CPU 5.52 sec
+INFO  : MapReduce Total cumulative CPU time: 5 seconds 520 msec
+INFO  : Ended Job = job_1788239956390_0077
+INFO  : Starting task [Stage-2:STATS] in serial mode
+INFO  : MapReduce Jobs Launched: 
+INFO  : Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 7.16 sec   HDFS Read: 778236 HDFS Write: 519 SUCCESS
+INFO  : Stage-Stage-3: Map: 1  Reduce: 1   Cumulative CPU: 5.52 sec   HDFS Read: 18301 HDFS Write: 434 SUCCESS
+INFO  : Total MapReduce CPU Time Spent: 12 seconds 680 msec
+INFO  : Completed executing command(queryId=hadoop_20260901135223_0c3616f9-525e-4a6c-8390-b72ba7b0de2e); Time taken: 38.02 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
+No rows affected (38.251 seconds)
+0: jdbc:hive2://localhost:10000> 
+0: jdbc:hive2://localhost:10000> INSERT OVERWRITE TABLE dws_order_day PARTITION (dt='2026-08-21')
+. . . . . . . . . . . . . . . .> SELECT
+. . . . . . . . . . . . . . . .>     COUNT(*) total_orders,
+. . . . . . . . . . . . . . . .>     SUM(CASE WHEN order_status='已支付' THEN 1 ELSE 0 END) paid_orders,
+. . . . . . . . . . . . . . . .>     SUM(CASE WHEN order_status='已取消' THEN 1 ELSE 0 END) cancelled_orders,
+. . . . . . . . . . . . . . . .>     SUM(CASE WHEN order_status='已退款' THEN 1 ELSE 0 END) refunded_orders,
+. . . . . . . . . . . . . . . .>     SUM(total_amount) total_amount,
+. . . . . . . . . . . . . . . .>     SUM(CASE WHEN is_paid=1 THEN total_amount ELSE 0 END) paid_amount,
+. . . . . . . . . . . . . . . .>     COUNT(DISTINCT user_id) unique_buyers,
+. . . . . . . . . . . . . . . .>     COUNT(DISTINCT CASE WHEN is_paid=1 THEN user_id END) unique_payers
+. . . . . . . . . . . . . . . .> FROM dwd_order_fact_di
+. . . . . . . . . . . . . . . .> WHERE dt='2026-08-21';
+INFO  : Compiling command(queryId=hadoop_20260901135301_9379babc-6417-4592-962b-710f64f54e24): INSERT OVERWRITE TABLE dws_order_day PARTITION (dt='2026-08-21')
+SELECT
+COUNT(*) total_orders,
+SUM(CASE WHEN order_status='已支付' THEN 1 ELSE 0 END) paid_orders,
+SUM(CASE WHEN order_status='已取消' THEN 1 ELSE 0 END) cancelled_orders,
+SUM(CASE WHEN order_status='已退款' THEN 1 ELSE 0 END) refunded_orders,
+SUM(total_amount) total_amount,
+SUM(CASE WHEN is_paid=1 THEN total_amount ELSE 0 END) paid_amount,
+COUNT(DISTINCT user_id) unique_buyers,
+COUNT(DISTINCT CASE WHEN is_paid=1 THEN user_id END) unique_payers
+FROM dwd_order_fact_di
+WHERE dt='2026-08-21'
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:_col0, type:bigint, comment:null), FieldSchema(name:_col1, type:bigint, comment:null), FieldSchema(name:_col2, type:bigint, comment:null), FieldSchema(name:_col3, type:bigint, comment:null), FieldSchema(name:_col4, type:decimal(18,2), comment:null), FieldSchema(name:_col5, type:decimal(18,2), comment:null), FieldSchema(name:_col6, type:bigint, comment:null), FieldSchema(name:_col7, type:bigint, comment:null)], properties:null)
+INFO  : Completed compiling command(queryId=hadoop_20260901135301_9379babc-6417-4592-962b-710f64f54e24); Time taken: 0.199 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hadoop_20260901135301_9379babc-6417-4592-962b-710f64f54e24): INSERT OVERWRITE TABLE dws_order_day PARTITION (dt='2026-08-21')
+SELECT
+COUNT(*) total_orders,
+SUM(CASE WHEN order_status='已支付' THEN 1 ELSE 0 END) paid_orders,
+SUM(CASE WHEN order_status='已取消' THEN 1 ELSE 0 END) cancelled_orders,
+SUM(CASE WHEN order_status='已退款' THEN 1 ELSE 0 END) refunded_orders,
+SUM(total_amount) total_amount,
+SUM(CASE WHEN is_paid=1 THEN total_amount ELSE 0 END) paid_amount,
+COUNT(DISTINCT user_id) unique_buyers,
+COUNT(DISTINCT CASE WHEN is_paid=1 THEN user_id END) unique_payers
+FROM dwd_order_fact_di
+WHERE dt='2026-08-21'
+WARN  : Hive-on-MR is deprecated in Hive 2 and may not be available in the future versions. Consider using a different execution engine (i.e. spark, tez) or using Hive 1.X releases.
+INFO  : Query ID = hadoop_20260901135301_9379babc-6417-4592-962b-710f64f54e24
+INFO  : Total jobs = 2
+INFO  : Launching Job 1 out of 2
+INFO  : Starting task [Stage-1:MAPRED] in serial mode
+INFO  : Number of reduce tasks determined at compile time: 1
+INFO  : In order to change the average load for a reducer (in bytes):
+INFO  :   set hive.exec.reducers.bytes.per.reducer=<number>
+INFO  : In order to limit the maximum number of reducers:
+INFO  :   set hive.exec.reducers.max=<number>
+INFO  : In order to set a constant number of reducers:
+INFO  :   set mapreduce.job.reduces=<number>
+INFO  : number of splits:1
+INFO  : Submitting tokens for job: job_1788239956390_0078
+INFO  : Executing with tokens: []
+INFO  : The url to track the job: http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0078/
+INFO  : Starting Job = job_1788239956390_0078, Tracking URL = http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0078/
+INFO  : Kill Command = /opt/hadoop-3.3.6/bin/mapred job  -kill job_1788239956390_0078
+INFO  : Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+INFO  : 2026-09-01 13:53:11,038 Stage-1 map = 0%,  reduce = 0%
+INFO  : 2026-09-01 13:53:16,126 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 5.15 sec
+INFO  : 2026-09-01 13:53:21,204 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 7.41 sec
+INFO  : MapReduce Total cumulative CPU time: 7 seconds 410 msec
+INFO  : Ended Job = job_1788239956390_0078
+INFO  : Starting task [Stage-0:MOVE] in serial mode
+INFO  : Loading data to table gmall.dws_order_day partition (dt=2026-08-21) from hdfs://localhost:9000/user/hive/warehouse/gmall.db/dws_order_day/dt=2026-08-21/.hive-staging_hive_2026-09-01_13-53-01_955_3257858959919279446-8/-ext-10000
+INFO  : Launching Job 2 out of 2
+INFO  : Starting task [Stage-3:MAPRED] in serial mode
+INFO  : Number of reduce tasks not specified. Estimated from input data size: 1
+INFO  : In order to change the average load for a reducer (in bytes):
+INFO  :   set hive.exec.reducers.bytes.per.reducer=<number>
+INFO  : In order to limit the maximum number of reducers:
+INFO  :   set hive.exec.reducers.max=<number>
+INFO  : In order to set a constant number of reducers:
+INFO  :   set mapreduce.job.reduces=<number>
+INFO  : number of splits:1
+INFO  : Submitting tokens for job: job_1788239956390_0079
+INFO  : Executing with tokens: []
+INFO  : The url to track the job: http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0079/
+INFO  : Starting Job = job_1788239956390_0079, Tracking URL = http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0079/
+INFO  : Kill Command = /opt/hadoop-3.3.6/bin/mapred job  -kill job_1788239956390_0079
+INFO  : Hadoop job information for Stage-3: number of mappers: 1; number of reducers: 1
+INFO  : 2026-09-01 13:53:32,033 Stage-3 map = 0%,  reduce = 0%
+INFO  : 2026-09-01 13:53:36,103 Stage-3 map = 100%,  reduce = 0%, Cumulative CPU 3.87 sec
+INFO  : 2026-09-01 13:53:41,189 Stage-3 map = 100%,  reduce = 100%, Cumulative CPU 5.4 sec
+INFO  : MapReduce Total cumulative CPU time: 5 seconds 400 msec
+INFO  : Ended Job = job_1788239956390_0079
+INFO  : Starting task [Stage-2:STATS] in serial mode
+INFO  : MapReduce Jobs Launched: 
+INFO  : Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 7.41 sec   HDFS Read: 772049 HDFS Write: 517 SUCCESS
+INFO  : Stage-Stage-3: Map: 1  Reduce: 1   Cumulative CPU: 5.4 sec   HDFS Read: 18302 HDFS Write: 434 SUCCESS
+INFO  : Total MapReduce CPU Time Spent: 12 seconds 810 msec
+INFO  : Completed executing command(queryId=hadoop_20260901135301_9379babc-6417-4592-962b-710f64f54e24); Time taken: 40.179 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
+No rows affected (40.387 seconds)
+0: jdbc:hive2://localhost:10000> 
+0: jdbc:hive2://localhost:10000> INSERT OVERWRITE TABLE dws_order_day PARTITION (dt='2026-08-22')
+. . . . . . . . . . . . . . . .> SELECT
+. . . . . . . . . . . . . . . .>     COUNT(*) total_orders,
+. . . . . . . . . . . . . . . .>     SUM(CASE WHEN order_status='已支付' THEN 1 ELSE 0 END) paid_orders,
+. . . . . . . . . . . . . . . .>     SUM(CASE WHEN order_status='已取消' THEN 1 ELSE 0 END) cancelled_orders,
+. . . . . . . . . . . . . . . .>     SUM(CASE WHEN order_status='已退款' THEN 1 ELSE 0 END) refunded_orders,
+. . . . . . . . . . . . . . . .>     SUM(total_amount) total_amount,
+. . . . . . . . . . . . . . . .>     SUM(CASE WHEN is_paid=1 THEN total_amount ELSE 0 END) paid_amount,
+. . . . . . . . . . . . . . . .>     COUNT(DISTINCT user_id) unique_buyers,
+. . . . . . . . . . . . . . . .>     COUNT(DISTINCT CASE WHEN is_paid=1 THEN user_id END) unique_payers
+. . . . . . . . . . . . . . . .> FROM dwd_order_fact_di
+. . . . . . . . . . . . . . . .> WHERE dt='2026-08-22';
+INFO  : Compiling command(queryId=hadoop_20260901135342_1a2fbb22-9ec5-4e60-ad91-f00653c4a51b): INSERT OVERWRITE TABLE dws_order_day PARTITION (dt='2026-08-22')
+SELECT
+COUNT(*) total_orders,
+SUM(CASE WHEN order_status='已支付' THEN 1 ELSE 0 END) paid_orders,
+SUM(CASE WHEN order_status='已取消' THEN 1 ELSE 0 END) cancelled_orders,
+SUM(CASE WHEN order_status='已退款' THEN 1 ELSE 0 END) refunded_orders,
+SUM(total_amount) total_amount,
+SUM(CASE WHEN is_paid=1 THEN total_amount ELSE 0 END) paid_amount,
+COUNT(DISTINCT user_id) unique_buyers,
+COUNT(DISTINCT CASE WHEN is_paid=1 THEN user_id END) unique_payers
+FROM dwd_order_fact_di
+WHERE dt='2026-08-22'
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:_col0, type:bigint, comment:null), FieldSchema(name:_col1, type:bigint, comment:null), FieldSchema(name:_col2, type:bigint, comment:null), FieldSchema(name:_col3, type:bigint, comment:null), FieldSchema(name:_col4, type:decimal(18,2), comment:null), FieldSchema(name:_col5, type:decimal(18,2), comment:null), FieldSchema(name:_col6, type:bigint, comment:null), FieldSchema(name:_col7, type:bigint, comment:null)], properties:null)
+INFO  : Completed compiling command(queryId=hadoop_20260901135342_1a2fbb22-9ec5-4e60-ad91-f00653c4a51b); Time taken: 0.203 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hadoop_20260901135342_1a2fbb22-9ec5-4e60-ad91-f00653c4a51b): INSERT OVERWRITE TABLE dws_order_day PARTITION (dt='2026-08-22')
+SELECT
+COUNT(*) total_orders,
+SUM(CASE WHEN order_status='已支付' THEN 1 ELSE 0 END) paid_orders,
+SUM(CASE WHEN order_status='已取消' THEN 1 ELSE 0 END) cancelled_orders,
+SUM(CASE WHEN order_status='已退款' THEN 1 ELSE 0 END) refunded_orders,
+SUM(total_amount) total_amount,
+SUM(CASE WHEN is_paid=1 THEN total_amount ELSE 0 END) paid_amount,
+COUNT(DISTINCT user_id) unique_buyers,
+COUNT(DISTINCT CASE WHEN is_paid=1 THEN user_id END) unique_payers
+FROM dwd_order_fact_di
+WHERE dt='2026-08-22'
+WARN  : Hive-on-MR is deprecated in Hive 2 and may not be available in the future versions. Consider using a different execution engine (i.e. spark, tez) or using Hive 1.X releases.
+INFO  : Query ID = hadoop_20260901135342_1a2fbb22-9ec5-4e60-ad91-f00653c4a51b
+INFO  : Total jobs = 2
+INFO  : Launching Job 1 out of 2
+INFO  : Starting task [Stage-1:MAPRED] in serial mode
+INFO  : Number of reduce tasks determined at compile time: 1
+INFO  : In order to change the average load for a reducer (in bytes):
+INFO  :   set hive.exec.reducers.bytes.per.reducer=<number>
+INFO  : In order to limit the maximum number of reducers:
+INFO  :   set hive.exec.reducers.max=<number>
+INFO  : In order to set a constant number of reducers:
+INFO  :   set mapreduce.job.reduces=<number>
+INFO  : number of splits:1
+INFO  : Submitting tokens for job: job_1788239956390_0080
+INFO  : Executing with tokens: []
+INFO  : The url to track the job: http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0080/
+INFO  : Starting Job = job_1788239956390_0080, Tracking URL = http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0080/
+INFO  : Kill Command = /opt/hadoop-3.3.6/bin/mapred job  -kill job_1788239956390_0080
+INFO  : Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+INFO  : 2026-09-01 13:53:51,996 Stage-1 map = 0%,  reduce = 0%
+INFO  : 2026-09-01 13:53:57,081 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 6.02 sec
+INFO  : 2026-09-01 13:54:02,175 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 8.31 sec
+INFO  : MapReduce Total cumulative CPU time: 8 seconds 310 msec
+INFO  : Ended Job = job_1788239956390_0080
+INFO  : Starting task [Stage-0:MOVE] in serial mode
+INFO  : Loading data to table gmall.dws_order_day partition (dt=2026-08-22) from hdfs://localhost:9000/user/hive/warehouse/gmall.db/dws_order_day/dt=2026-08-22/.hive-staging_hive_2026-09-01_13-53-42_470_177220176068570552-8/-ext-10000
+INFO  : Launching Job 2 out of 2
+INFO  : Starting task [Stage-3:MAPRED] in serial mode
+INFO  : Number of reduce tasks not specified. Estimated from input data size: 1
+INFO  : In order to change the average load for a reducer (in bytes):
+INFO  :   set hive.exec.reducers.bytes.per.reducer=<number>
+INFO  : In order to limit the maximum number of reducers:
+INFO  :   set hive.exec.reducers.max=<number>
+INFO  : In order to set a constant number of reducers:
+INFO  :   set mapreduce.job.reduces=<number>
+INFO  : number of splits:1
+INFO  : Submitting tokens for job: job_1788239956390_0081
+INFO  : Executing with tokens: []
+INFO  : The url to track the job: http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0081/
+INFO  : Starting Job = job_1788239956390_0081, Tracking URL = http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0081/
+INFO  : Kill Command = /opt/hadoop-3.3.6/bin/mapred job  -kill job_1788239956390_0081
+INFO  : Hadoop job information for Stage-3: number of mappers: 1; number of reducers: 1
+INFO  : 2026-09-01 13:54:13,406 Stage-3 map = 0%,  reduce = 0%
+INFO  : 2026-09-01 13:54:17,477 Stage-3 map = 100%,  reduce = 0%, Cumulative CPU 3.85 sec
+INFO  : 2026-09-01 13:54:22,554 Stage-3 map = 100%,  reduce = 100%, Cumulative CPU 5.25 sec
+INFO  : MapReduce Total cumulative CPU time: 5 seconds 250 msec
+INFO  : Ended Job = job_1788239956390_0081
+INFO  : Starting task [Stage-2:STATS] in serial mode
+INFO  : MapReduce Jobs Launched: 
+INFO  : Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 8.31 sec   HDFS Read: 787655 HDFS Write: 522 SUCCESS
+INFO  : Stage-Stage-3: Map: 1  Reduce: 1   Cumulative CPU: 5.25 sec   HDFS Read: 18296 HDFS Write: 436 SUCCESS
+INFO  : Total MapReduce CPU Time Spent: 13 seconds 560 msec
+INFO  : Completed executing command(queryId=hadoop_20260901135342_1a2fbb22-9ec5-4e60-ad91-f00653c4a51b); Time taken: 41.047 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
+No rows affected (41.259 seconds)
+0: jdbc:hive2://localhost:10000> 
+0: jdbc:hive2://localhost:10000> INSERT OVERWRITE TABLE dws_order_day PARTITION (dt='2026-08-23')
+. . . . . . . . . . . . . . . .> SELECT
+. . . . . . . . . . . . . . . .>     COUNT(*) total_orders,
+. . . . . . . . . . . . . . . .>     SUM(CASE WHEN order_status='已支付' THEN 1 ELSE 0 END) paid_orders,
+. . . . . . . . . . . . . . . .>     SUM(CASE WHEN order_status='已取消' THEN 1 ELSE 0 END) cancelled_orders,
+. . . . . . . . . . . . . . . .>     SUM(CASE WHEN order_status='已退款' THEN 1 ELSE 0 END) refunded_orders,
+. . . . . . . . . . . . . . . .>     SUM(total_amount) total_amount,
+. . . . . . . . . . . . . . . .>     SUM(CASE WHEN is_paid=1 THEN total_amount ELSE 0 END) paid_amount,
+. . . . . . . . . . . . . . . .>     COUNT(DISTINCT user_id) unique_buyers,
+. . . . . . . . . . . . . . . .>     COUNT(DISTINCT CASE WHEN is_paid=1 THEN user_id END) unique_payers
+. . . . . . . . . . . . . . . .> FROM dwd_order_fact_di
+. . . . . . . . . . . . . . . .> WHERE dt='2026-08-23';
+INFO  : Compiling command(queryId=hadoop_20260901135423_5f3fbba1-308c-4a0c-a613-c578c07b88cf): INSERT OVERWRITE TABLE dws_order_day PARTITION (dt='2026-08-23')
+SELECT
+COUNT(*) total_orders,
+SUM(CASE WHEN order_status='已支付' THEN 1 ELSE 0 END) paid_orders,
+SUM(CASE WHEN order_status='已取消' THEN 1 ELSE 0 END) cancelled_orders,
+SUM(CASE WHEN order_status='已退款' THEN 1 ELSE 0 END) refunded_orders,
+SUM(total_amount) total_amount,
+SUM(CASE WHEN is_paid=1 THEN total_amount ELSE 0 END) paid_amount,
+COUNT(DISTINCT user_id) unique_buyers,
+COUNT(DISTINCT CASE WHEN is_paid=1 THEN user_id END) unique_payers
+FROM dwd_order_fact_di
+WHERE dt='2026-08-23'
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:_col0, type:bigint, comment:null), FieldSchema(name:_col1, type:bigint, comment:null), FieldSchema(name:_col2, type:bigint, comment:null), FieldSchema(name:_col3, type:bigint, comment:null), FieldSchema(name:_col4, type:decimal(18,2), comment:null), FieldSchema(name:_col5, type:decimal(18,2), comment:null), FieldSchema(name:_col6, type:bigint, comment:null), FieldSchema(name:_col7, type:bigint, comment:null)], properties:null)
+INFO  : Completed compiling command(queryId=hadoop_20260901135423_5f3fbba1-308c-4a0c-a613-c578c07b88cf); Time taken: 0.243 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hadoop_20260901135423_5f3fbba1-308c-4a0c-a613-c578c07b88cf): INSERT OVERWRITE TABLE dws_order_day PARTITION (dt='2026-08-23')
+SELECT
+COUNT(*) total_orders,
+SUM(CASE WHEN order_status='已支付' THEN 1 ELSE 0 END) paid_orders,
+SUM(CASE WHEN order_status='已取消' THEN 1 ELSE 0 END) cancelled_orders,
+SUM(CASE WHEN order_status='已退款' THEN 1 ELSE 0 END) refunded_orders,
+SUM(total_amount) total_amount,
+SUM(CASE WHEN is_paid=1 THEN total_amount ELSE 0 END) paid_amount,
+COUNT(DISTINCT user_id) unique_buyers,
+COUNT(DISTINCT CASE WHEN is_paid=1 THEN user_id END) unique_payers
+FROM dwd_order_fact_di
+WHERE dt='2026-08-23'
+WARN  : Hive-on-MR is deprecated in Hive 2 and may not be available in the future versions. Consider using a different execution engine (i.e. spark, tez) or using Hive 1.X releases.
+INFO  : Query ID = hadoop_20260901135423_5f3fbba1-308c-4a0c-a613-c578c07b88cf
+INFO  : Total jobs = 2
+INFO  : Launching Job 1 out of 2
+INFO  : Starting task [Stage-1:MAPRED] in serial mode
+INFO  : Number of reduce tasks determined at compile time: 1
+INFO  : In order to change the average load for a reducer (in bytes):
+INFO  :   set hive.exec.reducers.bytes.per.reducer=<number>
+INFO  : In order to limit the maximum number of reducers:
+INFO  :   set hive.exec.reducers.max=<number>
+INFO  : In order to set a constant number of reducers:
+INFO  :   set mapreduce.job.reduces=<number>
+INFO  : number of splits:1
+INFO  : Submitting tokens for job: job_1788239956390_0082
+INFO  : Executing with tokens: []
+INFO  : The url to track the job: http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0082/
+INFO  : Starting Job = job_1788239956390_0082, Tracking URL = http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0082/
+INFO  : Kill Command = /opt/hadoop-3.3.6/bin/mapred job  -kill job_1788239956390_0082
+INFO  : Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+INFO  : 2026-09-01 13:54:33,585 Stage-1 map = 0%,  reduce = 0%
+INFO  : 2026-09-01 13:54:37,655 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 5.04 sec
+INFO  : 2026-09-01 13:54:42,738 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 7.18 sec
+INFO  : MapReduce Total cumulative CPU time: 7 seconds 180 msec
+INFO  : Ended Job = job_1788239956390_0082
+INFO  : Starting task [Stage-0:MOVE] in serial mode
+INFO  : Loading data to table gmall.dws_order_day partition (dt=2026-08-23) from hdfs://localhost:9000/user/hive/warehouse/gmall.db/dws_order_day/dt=2026-08-23/.hive-staging_hive_2026-09-01_13-54-23_880_5079709729785264927-8/-ext-10000
+INFO  : Launching Job 2 out of 2
+INFO  : Starting task [Stage-3:MAPRED] in serial mode
+INFO  : Number of reduce tasks not specified. Estimated from input data size: 1
+INFO  : In order to change the average load for a reducer (in bytes):
+INFO  :   set hive.exec.reducers.bytes.per.reducer=<number>
+INFO  : In order to limit the maximum number of reducers:
+INFO  :   set hive.exec.reducers.max=<number>
+INFO  : In order to set a constant number of reducers:
+INFO  :   set mapreduce.job.reduces=<number>
+INFO  : number of splits:1
+INFO  : Submitting tokens for job: job_1788239956390_0083
+INFO  : Executing with tokens: []
+INFO  : The url to track the job: http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0083/
+INFO  : Starting Job = job_1788239956390_0083, Tracking URL = http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0083/
+INFO  : Kill Command = /opt/hadoop-3.3.6/bin/mapred job  -kill job_1788239956390_0083
+INFO  : Hadoop job information for Stage-3: number of mappers: 1; number of reducers: 1
+INFO  : 2026-09-01 13:54:53,973 Stage-3 map = 0%,  reduce = 0%
+INFO  : 2026-09-01 13:54:58,051 Stage-3 map = 100%,  reduce = 0%, Cumulative CPU 3.9 sec
+INFO  : 2026-09-01 13:55:03,126 Stage-3 map = 100%,  reduce = 100%, Cumulative CPU 5.37 sec
+INFO  : MapReduce Total cumulative CPU time: 5 seconds 370 msec
+INFO  : Ended Job = job_1788239956390_0083
+INFO  : Starting task [Stage-2:STATS] in serial mode
+INFO  : MapReduce Jobs Launched: 
+INFO  : Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 7.18 sec   HDFS Read: 786269 HDFS Write: 518 SUCCESS
+INFO  : Stage-Stage-3: Map: 1  Reduce: 1   Cumulative CPU: 5.37 sec   HDFS Read: 18302 HDFS Write: 436 SUCCESS
+INFO  : Total MapReduce CPU Time Spent: 12 seconds 550 msec
+INFO  : Completed executing command(queryId=hadoop_20260901135423_5f3fbba1-308c-4a0c-a613-c578c07b88cf); Time taken: 40.159 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
+No rows affected (40.412 seconds)
+0: jdbc:hive2://localhost:10000> 
+0: jdbc:hive2://localhost:10000> INSERT OVERWRITE TABLE dws_order_day PARTITION (dt='2026-08-24')
+. . . . . . . . . . . . . . . .> SELECT
+. . . . . . . . . . . . . . . .>     COUNT(*) total_orders,
+. . . . . . . . . . . . . . . .>     SUM(CASE WHEN order_status='已支付' THEN 1 ELSE 0 END) paid_orders,
+. . . . . . . . . . . . . . . .>     SUM(CASE WHEN order_status='已取消' THEN 1 ELSE 0 END) cancelled_orders,
+. . . . . . . . . . . . . . . .>     SUM(CASE WHEN order_status='已退款' THEN 1 ELSE 0 END) refunded_orders,
+. . . . . . . . . . . . . . . .>     SUM(total_amount) total_amount,
+. . . . . . . . . . . . . . . .>     SUM(CASE WHEN is_paid=1 THEN total_amount ELSE 0 END) paid_amount,
+. . . . . . . . . . . . . . . .>     COUNT(DISTINCT user_id) unique_buyers,
+. . . . . . . . . . . . . . . .>     COUNT(DISTINCT CASE WHEN is_paid=1 THEN user_id END) unique_payers
+. . . . . . . . . . . . . . . .> FROM dwd_order_fact_di
+. . . . . . . . . . . . . . . .> WHERE dt='2026-08-24';
+INFO  : Compiling command(queryId=hadoop_20260901135504_3b4669e9-7e05-4b1f-a2ba-348bbe4680e6): INSERT OVERWRITE TABLE dws_order_day PARTITION (dt='2026-08-24')
+SELECT
+COUNT(*) total_orders,
+SUM(CASE WHEN order_status='已支付' THEN 1 ELSE 0 END) paid_orders,
+SUM(CASE WHEN order_status='已取消' THEN 1 ELSE 0 END) cancelled_orders,
+SUM(CASE WHEN order_status='已退款' THEN 1 ELSE 0 END) refunded_orders,
+SUM(total_amount) total_amount,
+SUM(CASE WHEN is_paid=1 THEN total_amount ELSE 0 END) paid_amount,
+COUNT(DISTINCT user_id) unique_buyers,
+COUNT(DISTINCT CASE WHEN is_paid=1 THEN user_id END) unique_payers
+FROM dwd_order_fact_di
+WHERE dt='2026-08-24'
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:_col0, type:bigint, comment:null), FieldSchema(name:_col1, type:bigint, comment:null), FieldSchema(name:_col2, type:bigint, comment:null), FieldSchema(name:_col3, type:bigint, comment:null), FieldSchema(name:_col4, type:decimal(18,2), comment:null), FieldSchema(name:_col5, type:decimal(18,2), comment:null), FieldSchema(name:_col6, type:bigint, comment:null), FieldSchema(name:_col7, type:bigint, comment:null)], properties:null)
+INFO  : Completed compiling command(queryId=hadoop_20260901135504_3b4669e9-7e05-4b1f-a2ba-348bbe4680e6); Time taken: 0.203 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hadoop_20260901135504_3b4669e9-7e05-4b1f-a2ba-348bbe4680e6): INSERT OVERWRITE TABLE dws_order_day PARTITION (dt='2026-08-24')
+SELECT
+COUNT(*) total_orders,
+SUM(CASE WHEN order_status='已支付' THEN 1 ELSE 0 END) paid_orders,
+SUM(CASE WHEN order_status='已取消' THEN 1 ELSE 0 END) cancelled_orders,
+SUM(CASE WHEN order_status='已退款' THEN 1 ELSE 0 END) refunded_orders,
+SUM(total_amount) total_amount,
+SUM(CASE WHEN is_paid=1 THEN total_amount ELSE 0 END) paid_amount,
+COUNT(DISTINCT user_id) unique_buyers,
+COUNT(DISTINCT CASE WHEN is_paid=1 THEN user_id END) unique_payers
+FROM dwd_order_fact_di
+WHERE dt='2026-08-24'
+WARN  : Hive-on-MR is deprecated in Hive 2 and may not be available in the future versions. Consider using a different execution engine (i.e. spark, tez) or using Hive 1.X releases.
+INFO  : Query ID = hadoop_20260901135504_3b4669e9-7e05-4b1f-a2ba-348bbe4680e6
+INFO  : Total jobs = 2
+INFO  : Launching Job 1 out of 2
+INFO  : Starting task [Stage-1:MAPRED] in serial mode
+INFO  : Number of reduce tasks determined at compile time: 1
+INFO  : In order to change the average load for a reducer (in bytes):
+INFO  :   set hive.exec.reducers.bytes.per.reducer=<number>
+INFO  : In order to limit the maximum number of reducers:
+INFO  :   set hive.exec.reducers.max=<number>
+INFO  : In order to set a constant number of reducers:
+INFO  :   set mapreduce.job.reduces=<number>
+INFO  : number of splits:1
+INFO  : Submitting tokens for job: job_1788239956390_0084
+INFO  : Executing with tokens: []
+INFO  : The url to track the job: http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0084/
+INFO  : Starting Job = job_1788239956390_0084, Tracking URL = http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0084/
+INFO  : Kill Command = /opt/hadoop-3.3.6/bin/mapred job  -kill job_1788239956390_0084
+INFO  : Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+INFO  : 2026-09-01 13:55:13,519 Stage-1 map = 0%,  reduce = 0%
+INFO  : 2026-09-01 13:55:18,611 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 5.67 sec
+INFO  : 2026-09-01 13:55:23,687 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 7.81 sec
+INFO  : MapReduce Total cumulative CPU time: 7 seconds 810 msec
+INFO  : Ended Job = job_1788239956390_0084
+INFO  : Starting task [Stage-0:MOVE] in serial mode
+INFO  : Loading data to table gmall.dws_order_day partition (dt=2026-08-24) from hdfs://localhost:9000/user/hive/warehouse/gmall.db/dws_order_day/dt=2026-08-24/.hive-staging_hive_2026-09-01_13-55-04_414_7868077049297310952-8/-ext-10000
+INFO  : Launching Job 2 out of 2
+INFO  : Starting task [Stage-3:MAPRED] in serial mode
+INFO  : Number of reduce tasks not specified. Estimated from input data size: 1
+INFO  : In order to change the average load for a reducer (in bytes):
+INFO  :   set hive.exec.reducers.bytes.per.reducer=<number>
+INFO  : In order to limit the maximum number of reducers:
+INFO  :   set hive.exec.reducers.max=<number>
+INFO  : In order to set a constant number of reducers:
+INFO  :   set mapreduce.job.reduces=<number>
+INFO  : number of splits:1
+INFO  : Submitting tokens for job: job_1788239956390_0085
+INFO  : Executing with tokens: []
+INFO  : The url to track the job: http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0085/
+INFO  : Starting Job = job_1788239956390_0085, Tracking URL = http://LiRuiheng.localdomain:8088/proxy/application_1788239956390_0085/
+INFO  : Kill Command = /opt/hadoop-3.3.6/bin/mapred job  -kill job_1788239956390_0085
+INFO  : Hadoop job information for Stage-3: number of mappers: 1; number of reducers: 1
+INFO  : 2026-09-01 13:55:33,902 Stage-3 map = 0%,  reduce = 0%
+INFO  : 2026-09-01 13:55:39,007 Stage-3 map = 100%,  reduce = 0%, Cumulative CPU 4.1 sec
+INFO  : 2026-09-01 13:55:43,070 Stage-3 map = 100%,  reduce = 100%, Cumulative CPU 5.7 sec
+INFO  : MapReduce Total cumulative CPU time: 5 seconds 700 msec
+INFO  : Ended Job = job_1788239956390_0085
+INFO  : Starting task [Stage-2:STATS] in serial mode
+INFO  : MapReduce Jobs Launched: 
+INFO  : Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 7.81 sec   HDFS Read: 783820 HDFS Write: 523 SUCCESS
+INFO  : Stage-Stage-3: Map: 1  Reduce: 1   Cumulative CPU: 5.7 sec   HDFS Read: 18307 HDFS Write: 436 SUCCESS
+INFO  : Total MapReduce CPU Time Spent: 13 seconds 510 msec
+INFO  : Completed executing command(queryId=hadoop_20260901135504_3b4669e9-7e05-4b1f-a2ba-348bbe4680e6); Time taken: 39.602 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
+No rows affected (39.813 seconds)
+0: jdbc:hive2://localhost:10000> Closing: 0: jdbc:hive2://localhost:10000

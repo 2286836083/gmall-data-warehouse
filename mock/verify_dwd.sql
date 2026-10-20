@@ -1,0 +1,11 @@
+USE gmall;
+SET hive.exec.mode.local.auto=false;
+SELECT 'DWD_user_behavior' t, COUNT(*) c FROM dwd_user_behavior_di;
+SELECT 'DWD_order_fact' t, COUNT(*) c FROM dwd_order_fact_di;
+SELECT 'DWD_beh_part' t, COUNT(DISTINCT dt) c FROM dwd_user_behavior_di;
+SELECT 'DWD_order_part' t, COUNT(DISTINCT dt) c FROM dwd_order_fact_di;
+SELECT '空user' t, COUNT(*) c FROM dwd_user_behavior_di WHERE user_id IS NULL OR user_id='';
+SELECT 'event_types' t, COUNT(*) c FROM (SELECT DISTINCT event_type FROM dwd_user_behavior_di) x;
+SELECT '未关联category' t, COUNT(*) c FROM dwd_user_behavior_di WHERE category_id='unknown';
+SELECT 'order_status' t, COUNT(*) c FROM (SELECT DISTINCT order_status FROM dwd_order_fact_di) x;
+SELECT 'is_paid_1' t, COUNT(*) c FROM dwd_order_fact_di WHERE is_paid=1;

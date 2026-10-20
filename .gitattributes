@@ -1,0 +1,31 @@
+# 换行符锁死为 LF
+# 理由：这些脚本最终要在 Linux 上执行，CRLF 会导致
+#       `/bin/bash^M: bad interpreter` —— 报错信息完全不指向真因
+# 现状：2026-10-20 实测 24 个 .sh 全部是 LF（0 个 CRLF），
+#       但那是运气，不是机制。加这个文件之后，任何平台上编辑都不会改坏。
+
+*.sh     text eol=lf
+*.py     text eol=lf
+*.sql    text eol=lf
+*.md     text eol=lf
+*.txt    text eol=lf
+*.json   text eol=lf
+*.html   text eol=lf
+*.js     text eol=lf
+*.css    text eol=lf
+*.yml    text eol=lf
+*.yaml   text eol=lf
+*.conf   text eol=lf
+*.ps1    text eol=crlf
+
+# 二进制文件，不做任何换行符转换
+*.zip    binary
+*.jar    binary
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.ico    binary
+*.woff   binary
+*.woff2  binary
+*.ttf    binary

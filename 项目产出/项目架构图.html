@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>gmall 电商数仓项目 · 架构图</title>
+<style>
+  :root {
+    --ink: #2C2C2A;
+    --ink-2: #5F5E5A;
+    --ink-3: #888780;
+    --line: #E3E1DA;
+    --blue: #185FA5;
+    --blue-50: #E6F1FB;
+    --blue-800: #0C447C;
+    --teal-800: #085041;
+    --amber: #854F0B;
+    --amber-50: #FAEEDA;
+    --bg: #FBFAF7;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 40px 24px 72px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  header { border-bottom: 2px solid var(--ink); padding-bottom: 20px; margin-bottom: 8px; }
+  h1 { font-size: 26px; font-weight: 600; margin: 0 0 8px; letter-spacing: -0.3px; }
+  .sub { color: var(--ink-2); margin: 0 0 12px; font-size: 14px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tag {
+    display: inline-block; padding: 2px 10px; border-radius: 999px;
+    background: #fff; border: 1px solid var(--line);
+    font-size: 12px; color: var(--ink-2); font-family: ui-monospace, Consolas, monospace;
+  }
+  section { margin-top: 44px; }
+  h2 {
+    font-size: 18px; font-weight: 600; margin: 0 0 6px;
+    padding-left: 12px; border-left: 4px solid var(--blue);
+  }
+  h2 .en { font-size: 12px; color: var(--ink-3); font-weight: 400; margin-left: 8px; letter-spacing: 0.5px; }
+  .lead { color: var(--ink-2); margin: 10px 0 20px; }
+  figure {
+    margin: 0; padding: 20px 16px; background: #fff;
+    border: 1px solid var(--line); border-radius: 14px;
+  }
+  figure svg { display: block; width: 100%; height: auto; }
+  figcaption { margin-top: 12px; font-size: 12px; color: var(--ink-3); text-align: center; }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 13px; background: #fff; }
+  caption { text-align: left; font-size: 12px; color: var(--ink-3); padding-bottom: 8px; }
+  th, td { border: 1px solid var(--line); padding: 8px 12px; text-align: left; vertical-align: top; }
+  th { background: #F5F3EE; font-weight: 600; white-space: nowrap; }
+  td code, p code, li code {
+    font-family: ui-monospace, Consolas, monospace; font-size: 12.5px;
+    background: #F1EFE8; padding: 1px 5px; border-radius: 4px;
+  }
+  tbody tr:nth-child(even) td { background: #FCFCFA; }
+  .layer { font-weight: 600; white-space: nowrap; }
+  .lh-ods { color: #185FA5; }
+  .lh-dwd { color: #0F6E56; }
+  .lh-dim { color: #854F0B; }
+  .lh-dws { color: #534AB7; }
+  .lh-ads { color: #A32D2D; }
+
+  .dag { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 22px 18px;
+         background: #fff; border: 1px solid var(--line); border-radius: 14px; }
+  .step {
+    display: flex; flex-direction: column; gap: 2px;
+    padding: 9px 14px; border-radius: 10px;
+    background: var(--blue-50); border: 1px solid var(--blue);
+  }
+  .step b { font-size: 13px; font-weight: 600; color: var(--blue-800); font-family: ui-monospace, Consolas, monospace; }
+  .step i { font-size: 11.5px; font-style: normal; color: var(--blue); }
+  .step.src { background: #F1EFE8; border-color: #B4B2A9; }
+  .step.src b { color: var(--ink); }
+  .step.src i { color: var(--ink-2); }
+  .step.par { background: var(--amber-50); border-color: var(--amber); }
+  .step.par b { color: var(--amber); }
+  .step.par i { color: var(--amber); }
+  .arrow { color: var(--ink-3); font-size: 15px; }
+  .parallel { display: flex; flex-direction: column; gap: 6px; padding: 10px;
+              border: 1px dashed var(--amber); border-radius: 12px; }
+  .parallel .step { padding: 6px 12px; }
+  .note {
+    margin-top: 16px; padding: 14px 18px; border-radius: 12px;
+    background: #fff; border: 1px solid var(--line); border-left: 4px solid var(--blue);
+  }
+  .note b { color: var(--blue-800); }
+  ul { padding-left: 22px; margin: 10px 0; }
+  li { margin: 4px 0; }
+  footer { margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--line);
+           font-size: 12px; color: var(--ink-3); }
+
+  @media print {
+    body { background: #fff; padding: 0; font-size: 12px; }
+    section { break-inside: avoid; }
+    figure { border: none; padding: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>电商用户行为分析离线数仓 · 架构图</h1>
+  <p class="sub">gmall 项目 · VMware 三节点真集群 · 全链路：模拟数据 → 分层建模 → 指标计算 → 定时调度 → 可视化</p>
+  <div class="tags">
+    <span class="tag">Hadoop 3.3.6</span>
+    <span class="tag">Hive 3.1.3</span>
+    <span class="tag">MySQL 8</span>
+    <span class="tag">ZooKeeper 3.8.7</span>
+    <span class="tag">DolphinScheduler 3.1.8</span>
+    <span class="tag">JDK 8</span>
+    <span class="tag">Ubuntu 24.04 Server</span>
+  </div>
+</header>
+
+<section>
+  <h2>一、三节点集群物理架构 <span class="en">Physical topology</span></h2>
+  <p class="lead">集群跑在 VMware Workstation 的三台 Ubuntu Server 虚拟机上，同处一个 NAT 网段并用静态 IP 互认主机名。所有管理类组件集中在 lrh-1，存储与计算分散在 lrh-2 / lrh-3，HDFS 副本因子为 3，真正落在三台机器上。</p>
+  <figure>
+    <svg viewBox="0 0 680 430" role="img">
+      <title>gmall 数仓项目三节点集群架构</title>
+      <desc>Windows 宿主机通过 SSH 与浏览器访问 VMware NAT 网络中的三台节点，lrh-1 承担管理与元数据组件，lrh-2 与 lrh-3 承担数据存储与任务执行。</desc>
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+      </defs>
+      <rect x="150" y="30" width="380" height="44" rx="8" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+      <text x="340" y="45" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="#2C2C2A">Windows 宿主机</text>
+      <text x="340" y="61" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#5F5E5A">SSH 终端 · 浏览器 · VS Code</text>
+      <line x1="340" y1="74" x2="340" y2="106" stroke="#888780" stroke-width="1" marker-end="url(#arrow)"/>
+      <rect x="40" y="110" width="600" height="296" rx="20" fill="#FFFFFF" stroke="#E3E1DA" stroke-width="0.5"/>
+      <text x="56" y="130" dominant-baseline="central" font-size="12" fill="#888780">VMware NAT 网络 · 192.168.87.0/24 · 三台 2核/4GB/30GB</text>
+      <rect x="52" y="142" width="184" height="228" rx="12" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+      <text x="144" y="164" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="#0C447C">lrh-1 · 主节点</text>
+      <text x="144" y="182" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#185FA5">192.168.87.131</text>
+      <line x1="64" y1="196" x2="224" y2="196" stroke="#B5D4F4" stroke-width="0.5"/>
+      <circle cx="70" cy="214" r="2.5" fill="#378ADD"/><text x="80" y="214" dominant-baseline="central" font-size="12" fill="#0C447C">NameNode</text>
+      <circle cx="70" cy="231" r="2.5" fill="#378ADD"/><text x="80" y="231" dominant-baseline="central" font-size="12" fill="#0C447C">SecondaryNameNode</text>
+      <circle cx="70" cy="248" r="2.5" fill="#378ADD"/><text x="80" y="248" dominant-baseline="central" font-size="12" fill="#0C447C">DataNode</text>
+      <circle cx="70" cy="265" r="2.5" fill="#378ADD"/><text x="80" y="265" dominant-baseline="central" font-size="12" fill="#0C447C">ResourceManager</text>
+      <circle cx="70" cy="282" r="2.5" fill="#378ADD"/><text x="80" y="282" dominant-baseline="central" font-size="12" fill="#0C447C">NodeManager</text>
+      <circle cx="70" cy="299" r="2.5" fill="#378ADD"/><text x="80" y="299" dominant-baseline="central" font-size="12" fill="#0C447C">ZooKeeper</text>
+      <circle cx="70" cy="316" r="2.5" fill="#378ADD"/><text x="80" y="316" dominant-baseline="central" font-size="12" fill="#0C447C">MySQL 8 · 元数据库</text>
+      <circle cx="70" cy="333" r="2.5" fill="#378ADD"/><text x="80" y="333" dominant-baseline="central" font-size="12" fill="#0C447C">HiveServer2 · MetaStore</text>
+      <circle cx="70" cy="350" r="2.5" fill="#378ADD"/><text x="80" y="350" dominant-baseline="central" font-size="12" fill="#0C447C">DS master · api · alert</text>
+      <rect x="248" y="142" width="184" height="228" rx="12" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+      <text x="340" y="164" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="#085041">lrh-2 · 工作节点</text>
+      <text x="340" y="182" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#0F6E56">192.168.87.130</text>
+      <line x1="260" y1="196" x2="420" y2="196" stroke="#9FE1CB" stroke-width="0.5"/>
+      <circle cx="266" cy="214" r="2.5" fill="#1D9E75"/><text x="276" y="214" dominant-baseline="central" font-size="12" fill="#085041">DataNode</text>
+      <circle cx="266" cy="231" r="2.5" fill="#1D9E75"/><text x="276" y="231" dominant-baseline="central" font-size="12" fill="#085041">NodeManager</text>
+      <circle cx="266" cy="248" r="2.5" fill="#1D9E75"/><text x="276" y="248" dominant-baseline="central" font-size="12" fill="#085041">ZooKeeper</text>
+      <circle cx="266" cy="265" r="2.5" fill="#1D9E75"/><text x="276" y="265" dominant-baseline="central" font-size="12" fill="#085041">DS worker-server</text>
+      <line x1="260" y1="286" x2="420" y2="286" stroke="#9FE1CB" stroke-width="0.5" stroke-dasharray="3 3"/>
+      <text x="340" y="304" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#0F6E56">HDFS 副本落盘处</text>
+      <text x="340" y="322" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#0F6E56">承接 YARN 派发的任务</text>
+      <rect x="444" y="142" width="184" height="228" rx="12" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+      <text x="536" y="164" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="#085041">lrh-3 · 工作节点</text>
+      <text x="536" y="182" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#0F6E56">192.168.87.132</text>
+      <line x1="456" y1="196" x2="616" y2="196" stroke="#9FE1CB" stroke-width="0.5"/>
+      <circle cx="462" cy="214" r="2.5" fill="#1D9E75"/><text x="472" y="214" dominant-baseline="central" font-size="12" fill="#085041">DataNode</text>
+      <circle cx="462" cy="231" r="2.5" fill="#1D9E75"/><text x="472" y="231" dominant-baseline="central" font-size="12" fill="#085041">NodeManager</text>
+      <circle cx="462" cy="248" r="2.5" fill="#1D9E75"/><text x="472" y="248" dominant-baseline="central" font-size="12" fill="#085041">ZooKeeper</text>
+      <circle cx="462" cy="265" r="2.5" fill="#1D9E75"/><text x="472" y="265" dominant-baseline="central" font-size="12" fill="#085041">DS worker-server</text>
+      <line x1="456" y1="286" x2="616" y2="286" stroke="#9FE1CB" stroke-width="0.5" stroke-dasharray="3 3"/>
+      <text x="536" y="304" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#0F6E56">HDFS 副本落盘处</text>
+      <text x="536" y="322" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#0F6E56">承接 YARN 派发的任务</text>
+      <text x="340" y="390" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#888780">副本因子 3 · 三节点对等 · 任一台故障数据不丢</text>
+    </svg>
+    <figcaption>图 1 · 三节点集群物理架构与组件分布</figcaption>
+  </figure>
+  <div class="note">
+    <b>两个容易踩的点：</b>Hadoop / Hive / ZooKeeper / MySQL 都是 systemd 开机自启，而 <b>DolphinScheduler 不自启</b>——虚拟机每次重启后要手动拉起 api / master / alert 和两台 worker；另外 lrh-1 实测可用内存只有 3868MB，DS 堆内存必须锁死 512MB，不能同时开 alert-server。
+  </div>
+</section>
+
+<section>
+  <h2>二、数仓分层与数据流向 <span class="en">Data lineage</span></h2>
+  <p class="lead">同一份数据在数仓里被加工四次，每层只干一件事：ODS 原样存、DWD 洗干净、DWS 做汇总、ADS 出指标。层与层之间靠 Hive SQL 衔接，全流程由 DolphinScheduler 编排成工作流定时驱动。</p>
+  <figure>
+    <svg viewBox="0 0 680 516" role="img">
+      <title>gmall 数仓分层与数据流向</title>
+      <desc>数据从模拟数据源依次经过 ODS、DWD、DWS、ADS 四层加工，最终输出到 Superset 与 ECharts 看板；DolphinScheduler 对四层加工任务做定时驱动。</desc>
+      <defs>
+        <marker id="arrow2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+      </defs>
+      <rect x="480" y="40" width="160" height="456" rx="16" fill="none" stroke="#AFA9EC" stroke-width="0.5" stroke-dasharray="4 4"/>
+      <rect x="494" y="58" width="132" height="56" rx="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/>
+      <text x="560" y="80" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="500" fill="#26215C">DolphinScheduler</text>
+      <text x="560" y="98" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#534AB7">定时调度全部任务</text>
+      <text x="560" y="150" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#534AB7">工作流 DAG 编排</text>
+      <text x="560" y="172" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#534AB7">每日定时跑批</text>
+      <text x="560" y="194" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#534AB7">失败自动告警</text>
+      <text x="560" y="330" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#534AB7">9 节点工作流</text>
+      <text x="560" y="352" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#534AB7">gmall_dw_pipeline</text>
+      <rect x="70" y="40" width="380" height="56" rx="8" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+      <text x="88" y="62" dominant-baseline="central" font-size="14" font-weight="500" fill="#2C2C2A">数据源 · 模拟电商业务数据</text>
+      <text x="88" y="80" dominant-baseline="central" font-size="12" fill="#5F5E5A">Python 脚本生成行为日志 / 订单 / 商品</text>
+      <line x1="260" y1="96" x2="260" y2="118" stroke="#888780" stroke-width="1" marker-end="url(#arrow2)"/>
+      <rect x="70" y="120" width="380" height="56" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+      <text x="88" y="142" dominant-baseline="central" font-size="14" font-weight="500" fill="#0C447C">ODS 原始数据层</text>
+      <text x="88" y="160" dominant-baseline="central" font-size="12" fill="#185FA5">原样接入 HDFS，不做任何修改</text>
+      <line x1="260" y1="176" x2="260" y2="198" stroke="#888780" stroke-width="1" marker-end="url(#arrow2)"/>
+      <rect x="70" y="200" width="380" height="56" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+      <text x="88" y="222" dominant-baseline="central" font-size="14" font-weight="500" fill="#0C447C">DWD 明细清洗层</text>
+      <text x="88" y="240" dominant-baseline="central" font-size="12" fill="#185FA5">去重 · 空值处理 · 格式标准化</text>
+      <line x1="260" y1="256" x2="260" y2="278" stroke="#888780" stroke-width="1" marker-end="url(#arrow2)"/>
+      <rect x="70" y="280" width="380" height="56" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+      <text x="88" y="302" dominant-baseline="central" font-size="14" font-weight="500" fill="#0C447C">DWS 主题汇总层</text>
+      <text x="88" y="320" dominant-baseline="central" font-size="12" fill="#185FA5">按用户 / 商品 / 订单做每日宽表汇总</text>
+      <line x1="260" y1="336" x2="260" y2="358" stroke="#888780" stroke-width="1" marker-end="url(#arrow2)"/>
+      <rect x="70" y="360" width="380" height="56" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+      <text x="88" y="382" dominant-baseline="central" font-size="14" font-weight="500" fill="#0C447C">ADS 指标结果层</text>
+      <text x="88" y="400" dominant-baseline="central" font-size="12" fill="#185FA5">DAU · 转化漏斗 · TopN · 复购率</text>
+      <line x1="260" y1="416" x2="260" y2="438" stroke="#888780" stroke-width="1" marker-end="url(#arrow2)"/>
+      <rect x="70" y="440" width="380" height="56" rx="8" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+      <text x="88" y="462" dominant-baseline="central" font-size="14" font-weight="500" fill="#2C2C2A">可视化展示</text>
+      <text x="88" y="480" dominant-baseline="central" font-size="12" fill="#5F5E5A">Superset 仪表盘 · ECharts 数据大屏</text>
+      <line x1="480" y1="148" x2="454" y2="148" stroke="#AFA9EC" stroke-width="0.5" stroke-dasharray="3 3" marker-end="url(#arrow2)"/>
+      <line x1="480" y1="228" x2="454" y2="228" stroke="#AFA9EC" stroke-width="0.5" stroke-dasharray="3 3" marker-end="url(#arrow2)"/>
+      <line x1="480" y1="308" x2="454" y2="308" stroke="#AFA9EC" stroke-width="0.5" stroke-dasharray="3 3" marker-end="url(#arrow2)"/>
+      <line x1="480" y1="388" x2="454" y2="388" stroke="#AFA9EC" stroke-width="0.5" stroke-dasharray="3 3" marker-end="url(#arrow2)"/>
+    </svg>
+    <figcaption>图 2 · 数仓四层分层与数据流向</figcaption>
+  </figure>
+  <table>
+    <caption>表 1 · 分层设计</caption>
+    <thead>
+      <tr><th>分层</th><th>全称</th><th>它做什么</th><th>数据粒度</th><th>存储格式</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="layer lh-ods">ODS</td>
+        <td>Operational Data Store</td>
+        <td>原始数据原样接入，不做任何加工，保留问题数据以便回溯</td>
+        <td>每条原始记录</td>
+        <td>按天分区 · TextFile</td>
+      </tr>
+      <tr>
+        <td class="layer lh-dwd">DWD</td>
+        <td>Data Warehouse Detail</td>
+        <td>去重、空值处理、格式标准化、脏数据过滤，沉淀干净明细</td>
+        <td>每条清洗后记录</td>
+        <td>按天分区 · Parquet</td>
+      </tr>
+      <tr>
+        <td class="layer lh-dim">DIM</td>
+        <td>Dimension</td>
+        <td>用户、商品等维度信息，为事实表提供关联属性</td>
+        <td>每个维度实体一条</td>
+        <td>全量快照</td>
+      </tr>
+      <tr>
+        <td class="layer lh-dws">DWS</td>
+        <td>Data Warehouse Summary</td>
+        <td>按用户 / 商品 / 订单三个主题做日粒度宽表汇总</td>
+        <td>每主体每天一条</td>
+        <td>按天分区 · Parquet</td>
+      </tr>
+      <tr>
+        <td class="layer lh-ads">ADS</td>
+        <td>Application Data Store</td>
+        <td>直接面向业务的指标结果，供看板与报表直读</td>
+        <td>每指标每天一条</td>
+        <td>非分区 · Parquet</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>三、DolphinScheduler 调度 DAG <span class="en">Workflow</span></h2>
+  <p class="lead">工作流 <code>gmall_dw_pipeline</code> 共 9 个节点，前 4 步严格串行，DWS 三个主题互不依赖可并列执行，最后由 ADS 指标计算收口并做结果校验。等待所有节点成功需要约 1 小时 10 分钟。</p>
+  <div class="dag">
+    <div class="step src"><b>create_db</b><i>建库 gmall</i></div>
+    <span class="arrow">→</span>
+    <div class="step src"><b>ddl</b><i>建 14 张表</i></div>
+    <span class="arrow">→</span>
+    <div class="step"><b>ods_load</b><i>数据装载入 ODS</i></div>
+    <span class="arrow">→</span>
+    <div class="step"><b>dwd_clean</b><i>清洗到 DWD</i></div>
+    <span class="arrow">→</span>
+    <div class="parallel">
+      <div class="step par"><b>dws_user</b><i>用户主题日汇总</i></div>
+      <div class="step par"><b>dws_sku</b><i>商品主题日汇总</i></div>
+      <div class="step par"><b>dws_order</b><i>订单主题日汇总</i></div>
+    </div>
+    <span class="arrow">→</span>
+    <div class="step"><b>ads_opt</b><i>计算 ADS 指标</i></div>
+    <span class="arrow">→</span>
+    <div class="step"><b>verify</b><i>结果校验</i></div>
+  </div>
+  <div class="note">
+    <b>两条路径跑的是同一批 SQL：</b>路径 A 在 lrh-1 上执行 <code>run_pipeline.sh</code>，9 步串行跑完，用来快速验证数仓逻辑（约 40 分钟）；路径 B 在 Web UI 上编排同一批脚本，用于展示调度能力和节点级进度。脚本统一放在 <code>/home/lrh/workspace/</code>，全部通过 <code>beeline -f</code> 提交给本机 HiveServer2。
+  </div>
+</section>
+
+<section>
+  <h2>四、表清单 <span class="en">gmall 库 · 15 张表</span></h2>
+  <table>
+    <thead>
+      <tr><th>分层</th><th>表名</th><th>含义</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="layer lh-ods" rowspan="3">ODS</td><td><code>ods_user_log_di</code></td><td>用户行为日志（原始）</td></tr>
+      <tr><td><code>ods_order_info_di</code></td><td>订单信息（原始）</td></tr>
+      <tr><td><code>ods_sku_info_di</code></td><td>商品信息（原始）</td></tr>
+      <tr><td class="layer lh-dwd" rowspan="2">DWD</td><td><code>dwd_user_behavior_di</code></td><td>清洗后的用户行为明细</td></tr>
+      <tr><td><code>dwd_order_fact_di</code></td><td>清洗后的订单事实明细</td></tr>
+      <tr><td class="layer lh-dim" rowspan="2">DIM</td><td><code>dim_user</code></td><td>用户维度表</td></tr>
+      <tr><td><code>dim_sku</code></td><td>商品维度表</td></tr>
+      <tr><td class="layer lh-dws" rowspan="3">DWS</td><td><code>dws_user_day</code></td><td>按天的用户汇总（日活、加购、下单、支付）</td></tr>
+      <tr><td><code>dws_sku_day</code></td><td>按天的商品汇总（销量、GMV）</td></tr>
+      <tr><td><code>dws_order_day</code></td><td>按天的订单汇总（订单量、支付金额、退款）</td></tr>
+      <tr><td class="layer lh-ads" rowspan="4">ADS</td><td><code>ads_dau</code></td><td>每日活跃用户数</td></tr>
+      <tr><td><code>ads_conversion_funnel</code></td><td>浏览 → 加购 → 下单 → 支付转化漏斗</td></tr>
+      <tr><td><code>ads_repurchase_rate</code></td><td>复购率</td></tr>
+      <tr><td><code>ads_top_sku</code></td><td>热销商品 TOP N</td></tr>
+    </tbody>
+  </table>
+  <p class="lead" style="margin-top:14px">另有临时表 <code>tmp_order_user_cnt</code> 用于中间计算。参考产出：5 天数据，DAU 均为 1000，漏斗 1000 → 963 → 851 → 650，TOP1 商品 GMV 约 465 万。</p>
+</section>
+
+<section>
+  <h2>五、端口与访问地址 <span class="en">Endpoints</span></h2>
+  <table>
+    <thead>
+      <tr><th>服务</th><th>所在节点</th><th>端口</th><th>访问地址 / 用途</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>HDFS Web UI</td><td>lrh-1</td><td>9870</td><td><code>http://lrh-1:9870</code> — 浏览文件、看 DataNode 状态</td></tr>
+      <tr><td>YARN Web UI</td><td>lrh-1</td><td>8088</td><td><code>http://lrh-1:8088</code> — 查看任务与资源占用</td></tr>
+      <tr><td>DolphinScheduler</td><td>lrh-1</td><td>12345</td><td><code>http://lrh-1:12345/dolphinscheduler</code> — admin / dolphinscheduler123</td></tr>
+      <tr><td>HiveServer2</td><td>lrh-1</td><td>10000</td><td><code>jdbc:hive2://lrh-1:10000</code> — beeline 提交 SQL</td></tr>
+      <tr><td>Hive MetaStore</td><td>lrh-1</td><td>9083</td><td><code>thrift://lrh-1:9083</code> — 内部调用</td></tr>
+      <tr><td>NameNode RPC</td><td>lrh-1</td><td>8020</td><td>HDFS 客户端与 DataNode 通信</td></tr>
+      <tr><td>ZooKeeper</td><td>三台</td><td>2181</td><td>集群仲裁，记录 DS master / worker 在线情况</td></tr>
+      <tr><td>MySQL</td><td>lrh-1</td><td>3306</td><td>hive 元数据库 + dolphinscheduler 元数据库</td></tr>
+      <tr><td>DataNode / NodeManager</td><td>三台</td><td>9864 / 8042</td><td>数据块与容器管理端口</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>六、关键运行参数 <span class="en">Constraints</span></h2>
+  <ul>
+    <li><b>数据规模</b>：商品 500 条、行为日志 10 万条、订单 5 万条，按 5 天分区落库（可扩展至 30 天 / 百万级）。</li>
+    <li><b>副本因子 3</b>：真实分布在三台 DataNode 上，单节点宕机不影响数据完整性。</li>
+    <li><b>内存红线</b>：lrh-1 实测 3868MB，全栈起完后 available 约 300MB，swap 用到 1.7GB。DS 堆锁定 <code>-Xms512m -Xmx512m</code>，不随意调大。</li>
+    <li><b>任务必须后台跑</b>：长任务用 <code>setsid nohup ... &amp;</code>，避免 ssh 断线导致任务中断。</li>
+    <li><b>关机前先停 Hadoop</b>：<code>sudo systemctl stop hadoop</code>，防止 HDFS 元数据损坏。</li>
+    <li><b>Hive 仓库真实路径</b>：<code>/user/hive/warehouse/gmall.db</code>，由 <code>hive.metastore.warehouse.dir</code> 决定。</li>
+  </ul>
+</section>
+
+<footer>
+  项目架构图 · 基于 D:\数据开发 目录下的项目文档整理 · 生成日期 2026-09-27<br>
+  对应文档：项目介绍与环境架构.md / 三节点大数据集群部署说明.md / 虚拟机集群使用指南.md / 手把手教程
+</footer>
+
+</div>
+</body>
+</html>

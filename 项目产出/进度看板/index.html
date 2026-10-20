@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>gmall 数仓 · DWD 清洗落表进度</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 28px 20px 40px;
+    background: #f1f5f9; color: #1e293b;
+    font-family: "Microsoft YaHei", system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 14px; line-height: 1.6;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  h1 { font-size: 20px; font-weight: 600; margin: 0 0 4px; }
+  .sub { color: #64748b; font-size: 13px; margin-bottom: 20px; }
+  .card {
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
+    padding: 20px 22px; margin-bottom: 16px;
+  }
+  .topline { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .pct { font-size: 34px; font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .pct small { font-size: 15px; font-weight: 400; color: #64748b; margin-left: 6px; }
+  .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 999px;
+    font-size: 12px; border: 1px solid;
+  }
+  .b-run { color: #b45309; background: #fffbeb; border-color: #fcd34d; }
+  .b-ok  { color: #15803d; background: #f0fdf4; border-color: #86efac; }
+  .b-bad { color: #b91c1c; background: #fef2f2; border-color: #fca5a5; }
+  .track {
+    position: relative; height: 14px; background: #e2e8f0;
+    border-radius: 999px; overflow: hidden; margin: 16px 0 10px;
+  }
+  .fill {
+    height: 100%; width: 0; border-radius: 999px;
+    background: #2563eb; transition: width .5s ease;
+  }
+  .fill.f-ok { background: #16a34a; }
+  .ticks { position: absolute; inset: 0; display: flex; }
+  .ticks i { flex: 1; border-right: 1px solid #f1f5f9; }
+  .ticks i:last-child { border-right: 0; }
+  .meta { display: flex; flex-wrap: wrap; gap: 18px; color: #64748b; font-size: 13px; }
+  .meta b { color: #1e293b; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .steps { list-style: none; margin: 0; padding: 0; }
+  .steps li {
+    display: grid; grid-template-columns: 26px 1fr auto;
+    gap: 10px; align-items: start;
+    padding: 12px 0; border-bottom: 1px dashed #e2e8f0;
+  }
+  .steps li:last-child { border-bottom: 0; }
+  .dot { width: 20px; height: 20px; border-radius: 999px; margin-top: 3px;
+         display: flex; align-items: center; justify-content: center;
+         font-size: 12px; color: #fff; background: #cbd5e1; }
+  .s-ok .dot { background: #16a34a; }
+  .s-run .dot { background: #f59e0b; }
+  .name { font-weight: 500; }
+  .sub2 { color: #64748b; font-size: 12px; }
+  .right { text-align: right; color: #64748b; font-size: 12px; white-space: nowrap; }
+  .s-pending .name { color: #94a3b8; font-weight: 400; }
+  .s-pending .sub2 { color: #cbd5e1; }
+  .subbar { height: 6px; background: #e2e8f0; border-radius: 999px; overflow: hidden; margin-top: 8px; }
+  .subbar span { display: block; height: 100%; background: #f59e0b; border-radius: 999px; transition: width .5s ease; }
+  .err { background: #fef2f2; border-color: #fca5a5; color: #b91c1c; }
+  .foot { color: #94a3b8; font-size: 12px; display: flex; flex-wrap: wrap; gap: 16px; }
+  code { font-family: Consolas, monospace; background: #f1f5f9; padding: 1px 5px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 id="h1">gmall 数仓 · DWD 清洗落表进度</h1>
+  <div class="sub" id="sub">正在读取集群状态…</div>
+
+  <div class="card">
+    <div class="topline">
+      <div class="pct" id="pct">--<small>%</small></div>
+      <span class="badge b-run" id="badge">连接中</span>
+    </div>
+    <div class="track"><div class="fill" id="fill"></div><div class="ticks"><i></i><i></i><i></i><i></i><i></i></div></div>
+    <div class="meta">
+      <span>步骤 <b id="stepcnt">-</b></span>
+      <span>已用 <b id="elapsed">-</b></span>
+      <span>预计剩余 <b id="eta">-</b></span>
+      <span>更新于 <b id="updated">-</b></span>
+    </div>
+  </div>
+
+  <div class="card"><ul class="steps" id="steps"></ul></div>
+  <div class="card foot" id="foot"></div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+function hms(sec) {
+  if (sec == null || isNaN(sec)) return "-";
+  sec = Math.max(0, Math.round(sec));
+  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+  const p = n => String(n).padStart(2, "0");
+  return h > 0 ? `${h}:${p(m)}:${p(s)}` : `${m}:${p(s)}`;
+}
+
+function render(payload, error) {
+  if (error && !payload) {
+    $("sub").textContent = "无法连接集群：" + error;
+    $("badge").textContent = "失联"; $("badge").className = "badge b-bad";
+    return;
+  }
+  if (!payload) return;
+
+  const p = payload;
+  if (p.title) { $("h1").textContent = p.title; document.title = p.title; }
+  $("sub").textContent = p.sub || "真实数据集 REES46 数仓链路";
+  $("pct").innerHTML = Math.round(p.overall * 100) + '<small>%</small>';
+  $("stepcnt").textContent = p.done_steps + " / " + p.total_steps;
+  $("elapsed").textContent = hms(p.elapsed);
+  $("eta").textContent = p.done ? "已完成" : hms(p.eta);
+  $("updated").textContent = p.updated;
+
+  const fill = $("fill");
+  fill.style.width = (p.overall * 100).toFixed(1) + "%";
+  fill.className = "fill" + (p.overall >= 1 ? " f-ok" : "");
+
+  const badge = $("badge");
+  if (p.done) { badge.textContent = "全部完成"; badge.className = "badge b-ok"; }
+  else if (p.runner === "RUNNING") { badge.textContent = "执行中"; badge.className = "badge b-run"; }
+  else { badge.textContent = "已停止（未完成）"; badge.className = "badge b-bad"; }
+
+  const ul = $("steps");
+  ul.innerHTML = "";
+  for (const s of p.steps) {
+    const cls = s.state === "OK" ? "s-ok" : (s.state === "RUNNING" ? "s-run" : "s-pending");
+    const mark = s.state === "OK" ? "✓" : (s.state === "RUNNING" ? "▶" : s.no);
+    const right = s.state === "OK" ? (s.elapsed || "完成")
+                : (s.state === "FAIL" ? "失败" : (s.state === "RUNNING" ? (s.elapsed || "进行中") : "等待"));
+    const extra = s.state === "RUNNING" && s.stage
+      ? `<div class="subbar"><span style="width:${(s.frac * 100).toFixed(0)}%"></span></div>
+         <div class="sub2" style="margin-top:4px">${s.job || ""} · ${s.stage}</div>` : "";
+    ul.insertAdjacentHTML("beforeend",
+      `<li class="${cls}"><div class="dot">${mark}</div>
+        <div><div class="name">${s.no}. ${s.name}</div><div class="sub2">${s.sub}</div>${extra}</div>
+        <div class="right">${right}</div></li>`);
+  }
+
+  const foot = [];
+  if (p.mem) foot.push(`<span>lrh-1 内存 ${p.mem}</span>`);
+  if (p.disk) foot.push(`<span>根分区 ${p.disk}</span>`);
+  foot.push(`<span>集群侧状态文件 <code>/home/lrh/workspace/dwd_run/status.tsv</code></span>`);
+  $("foot").innerHTML = foot.join("");
+}
+
+async function tick() {
+  try {
+    const r = await fetch("progress.json?t=" + Date.now(), { cache: "no-store" });
+    const j = await r.json();
+    render(j.payload, j.error);
+  } catch (e) {
+    $("sub").textContent = "读取 progress.json 失败：" + e.message;
+  }
+}
+tick();
+setInterval(tick, 3000);
+</script>
+</body>
+</html>

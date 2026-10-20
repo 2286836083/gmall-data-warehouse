@@ -1,0 +1,7 @@
+USE gmall;
+DROP TABLE IF EXISTS zz_realchk;
+CREATE TABLE zz_realchk (
+    a1 STRING COMMENT '用户编号',
+    a2 STRING COMMENT '用户姓名'
+) COMMENT '真实中文注释测试'
+ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t';

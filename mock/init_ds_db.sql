@@ -1,0 +1,4 @@
+CREATE DATABASE IF NOT EXISTS dolphinscheduler DEFAULT CHARACTER SET utf8mb4;
+CREATE USER IF NOT EXISTS 'ds_user'@'%' IDENTIFIED BY 'ds_password123';
+GRANT ALL PRIVILEGES ON dolphinscheduler.* TO 'ds_user'@'%';
+FLUSH PRIVILEGES;

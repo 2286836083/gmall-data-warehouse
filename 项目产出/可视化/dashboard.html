@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>电商用户行为分析 · 数据大屏</title>
+<style>
+  :root{
+    --bg:#08101f;
+    --bg2:#0d1a2f;
+    --panel:rgba(255,255,255,.035);
+    --line:rgba(0,212,255,.16);
+    --line2:rgba(0,212,255,.34);
+    --txt:#e8f2ff;
+    --muted:#7d93b2;
+    --cyan:#00d4ff;
+    --blue:#3b82f6;
+    --purple:#8b5cf6;
+    --amber:#f5a524;
+    --teal:#2dd4bf;
+    --pink:#ec4899;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0,212,255,.10), transparent 60%),
+      var(--bg);
+    color:var(--txt);
+    font-family:-apple-system,"PingFang SC","Microsoft YaHei","Segoe UI",sans-serif;
+    min-height:100vh;
+    padding:16px 20px 28px;
+  }
+
+  header{display:flex;align-items:flex-end;justify-content:space-between;
+    padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:16px;flex-wrap:wrap;gap:10px}
+  h1{font-size:23px;font-weight:600;letter-spacing:1px}
+  h1 span{color:var(--cyan)}
+  .sub{font-size:12.5px;color:var(--muted);margin-top:5px}
+  .meta{font-size:12px;color:var(--muted);text-align:right;line-height:1.7}
+  .meta b{color:var(--cyan);font-weight:500}
+
+  .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:12px}
+  .kpi{
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:13px 15px;position:relative;overflow:hidden;
+  }
+  .kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--cyan);opacity:.85}
+  .kpi.k2::before{background:var(--blue)}
+  .kpi.k3::before{background:var(--purple)}
+  .kpi.k4::before{background:var(--amber)}
+  .kpi.k5::before{background:var(--teal)}
+  .kpi.k6::before{background:var(--pink)}
+  .kpi .label{font-size:12px;color:var(--muted);margin-bottom:7px}
+  .kpi .value{font-size:25px;font-weight:600;letter-spacing:.5px;line-height:1}
+  .kpi .value small{font-size:13px;font-weight:400;color:var(--muted);margin-left:3px}
+  .kpi .foot{font-size:11.5px;color:var(--muted);margin-top:6px}
+
+  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px 6px}
+  .card h3{font-size:13.5px;font-weight:500;color:var(--txt);margin-bottom:2px;
+    padding-left:9px;border-left:3px solid var(--cyan);line-height:1.2}
+  .card h3 em{font-style:normal;font-size:11.5px;color:var(--muted);font-weight:400;margin-left:7px}
+  .chart{width:100%;height:290px}
+  .chart.short{height:215px}
+  .col4{grid-column:span 4}.col5{grid-column:span 5}
+  .col6{grid-column:span 6}.col7{grid-column:span 7}
+  .col8{grid-column:span 8}.col12{grid-column:span 12}
+
+  .defs{font-size:12.5px;line-height:1.95;color:var(--muted);padding:6px 4px 10px}
+  .defs b{color:var(--txt);font-weight:500}
+  .defs .k{color:var(--cyan);font-weight:500}
+
+  footer{margin-top:18px;padding-top:12px;border-top:1px solid var(--line);
+    font-size:11.5px;color:var(--muted);text-align:center;line-height:1.8}
+
+  #err{display:none;background:rgba(245,165,36,.08);border:1px solid rgba(245,165,36,.45);
+    border-radius:10px;padding:18px 20px;font-size:13.5px;line-height:1.9;margin-bottom:14px}
+  #err b{color:var(--amber)}
+  code{background:rgba(0,212,255,.10);color:var(--cyan);padding:2px 6px;border-radius:4px;
+    font-family:ui-monospace,Consolas,monospace;font-size:12.5px}
+
+  @media (max-width:1400px){
+    .kpis{grid-template-columns:repeat(3,1fr)}
+    .col4,.col5,.col6,.col7,.col8{grid-column:span 12}
+  }
+  @media print{
+    body{background:#fff;color:#111}
+    .kpi .value,.defs .k{color:#0b6ba8}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>电商用户行为分析 <span>· 离线数仓数据大屏</span></h1>
+    <div class="sub">数据链路：模拟数据 → ODS 原始层 → DWD 明细层 → DWS 汇总层 → ADS 指标层 → 可视化</div>
+  </div>
+  <div class="meta">
+    数据区间：<b id="range">—</b><br>
+    数据导出时间：<b id="gen">—</b><br>
+    数据源：Hive <b>gmall</b> 库
+  </div>
+</header>
+
+<div id="err">
+  <b>数据文件未加载。</b><br>
+  这个页面依赖同目录下的两个文件：<code>dashboard_data.js</code>（数据）和 <code>echarts.min.js</code>（图表库）。<br>
+  请确认它们与 <code>dashboard.html</code> 放在同一个文件夹里。<br>
+  数据文件由集群上的导出脚本生成：<code>bash export_dashboard_data.sh</code>
+</div>
+
+<div class="kpis">
+  <div class="kpi k1"><div class="label">日均活跃用户 DAU</div><div class="value" id="k-dau">—</div><div class="foot">每日去重活跃用户</div></div>
+  <div class="kpi k2"><div class="label">总订单量</div><div class="value" id="k-orders">—</div><div class="foot">区间内累计下单</div></div>
+  <div class="kpi k3"><div class="label">支付订单量</div><div class="value" id="k-paid">—</div><div class="foot">状态为已支付</div></div>
+  <div class="kpi k4"><div class="label">支付金额</div><div class="value" id="k-gmv">—</div><div class="foot">已支付订单金额合计</div></div>
+  <div class="kpi k5"><div class="label">整体转化率</div><div class="value" id="k-conv">—</div><div class="foot">支付用户 / 浏览用户</div></div>
+  <div class="kpi k6"><div class="label">复购率</div><div class="value" id="k-rep">—</div><div class="foot">购买 ≥2 次用户占比</div></div>
+</div>
+
+<div class="grid">
+  <div class="card col4">
+    <h3>转化漏斗 <em>浏览 → 加购 → 下单 → 支付</em></h3>
+    <div class="chart" id="c-funnel"></div>
+  </div>
+  <div class="card col8">
+    <h3>用户转化趋势 <em>各环节去重用户数（按天）</em></h3>
+    <div class="chart" id="c-trend"></div>
+  </div>
+
+  <div class="card col6">
+    <h3>热销商品 TOP15 <em>按支付金额排名</em></h3>
+    <div class="chart" id="c-sku"></div>
+  </div>
+  <div class="card col6">
+    <h3>订单金额趋势 <em>订单总额 vs 支付金额</em></h3>
+    <div class="chart" id="c-gmv"></div>
+  </div>
+
+  <div class="card col5">
+    <h3>订单状态构成 <em>按天堆叠</em></h3>
+    <div class="chart short" id="c-status"></div>
+  </div>
+  <div class="card col7">
+    <h3>指标口径说明 <em>面试与答辩会被问到</em></h3>
+    <div class="defs">
+      <div><span class="k">DAU</span>：当天产生过任意行为（浏览/加购/下单/支付）的<b>去重用户数</b>。</div>
+      <div><span class="k">转化漏斗</span>：浏览 → 加购 → 下单 → 支付的各环节<b>去重用户数</b>。</div>
+      <div><span class="k">环节转化率</span>：本环节用户数 ÷ 上一环节用户数；<b>整体转化率</b> = 支付用户 ÷ 浏览用户。</div>
+      <div><span class="k">复购率</span>：统计周期内购买 ≥2 次的用户数 ÷ 总购买用户数，按用户维度去重计算。</div>
+      <div><span class="k">GMV</span>：订单总金额，<b>含</b>未支付、已取消、已退款的订单。</div>
+      <div><span class="k">支付金额</span>：仅统计状态为已支付的订单金额，比 GMV 更贴近真实营收。</div>
+      <div><span class="k">明细粒度</span>：ADS 层每指标每天一条；ODS/DWD/DWS 按天分区存储。</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  本项目为「电商用户行为分析离线数仓」实战项目 · Hadoop 3.3.6 + Hive 3.1.3 + DolphinScheduler 3.1.8 三节点集群<br>
+  页面为纯静态文件，双击即可打开，不依赖网络与后端服务
+</footer>
+
+<script src="./echarts.min.js"></script>
+<script src="./dashboard_data.js"></script>
+<script>
+(function () {
+  var D = window.DASHBOARD_DATA;
+  if (!D) { document.getElementById('err').style.display = 'block'; return; }
+
+  var C = { cyan:'#00d4ff', blue:'#3b82f6', purple:'#8b5cf6', amber:'#f5a524',
+            teal:'#2dd4bf', pink:'#ec4899', muted:'#7d93b2', line:'rgba(255,255,255,.08)' };
+
+  function num(n) { return (n === null || n === undefined) ? '—' : Number(n).toLocaleString('zh-CN'); }
+  function money(n) {
+    if (n === null || n === undefined) return '—';
+    n = Number(n);
+    if (n >= 1e8) return '¥' + (n / 1e8).toFixed(2) + '<small>亿</small>';
+    if (n >= 1e4) return '¥' + (n / 1e4).toFixed(1) + '<small>万</small>';
+    return '¥' + n.toFixed(2);
+  }
+  function pct(n, d) { return n === null ? '—' : (Number(n) * 100).toFixed(d === undefined ? 2 : d) + '<small>%</small>'; }
+  function sum(arr, key) { return arr.reduce(function (s, r) { return s + (Number(r[key]) || 0); }, 0); }
+  function avg(arr, key) { return arr.length ? sum(arr, key) / arr.length : 0; }
+
+  var dau = D.dau || [], funnel = D.funnel || [], rep = D.repurchase || [],
+      sku = D.top_sku || [], ord = D.order_day || [];
+
+  document.getElementById('range').textContent =
+    dau.length ? dau[0].dt + ' ~ ' + dau[dau.length - 1].dt : '—';
+  document.getElementById('gen').textContent = D.generated_at || '—';
+
+  document.getElementById('k-dau').innerHTML = num(Math.round(avg(dau, 'dau')));
+  document.getElementById('k-orders').innerHTML = num(sum(ord, 'total_orders'));
+  document.getElementById('k-paid').innerHTML = num(sum(ord, 'paid_orders'));
+  document.getElementById('k-gmv').innerHTML = money(sum(ord, 'paid_amount'));
+  document.getElementById('k-conv').innerHTML = pct(avg(funnel, 'overall_rate'), 1);
+  document.getElementById('k-rep').innerHTML = pct(avg(rep, 'repurchase_rate'), 2);
+
+  var axisLabel = { color: C.muted, fontSize: 11.5 };
+  var splitLine = { lineStyle: { color: C.line } };
+  var gridBase = { left: 58, right: 22, top: 42, bottom: 34 };
+  var tip = {
+    backgroundColor: 'rgba(8,16,31,.94)',
+    borderColor: C.cyan, borderWidth: 1,
+    textStyle: { color: '#e8f2ff', fontSize: 12.5 }
+  };
+  var legendBase = { textStyle: { color: C.muted, fontSize: 11.5 }, itemWidth: 12, itemHeight: 8, top: 2 };
+
+  var charts = [];
+
+  /* 1. 转化漏斗（取最新一天） */
+  if (funnel.length) {
+    var f = funnel[funnel.length - 1];
+    var el = echarts.init(document.getElementById('c-funnel'));
+    el.setOption({
+      tooltip: Object.assign({ trigger: 'item', formatter: '{b}<br/>{c} 人' }, tip),
+      series: [{
+        type: 'funnel', left: 12, right: 12, top: 46, bottom: 8,
+        minSize: '34%', gap: 3,
+        label: { color: '#e8f2ff', fontSize: 12, position: 'inside',
+                 formatter: function (p) { return p.name + '  ' + p.value; } },
+        itemStyle: { borderWidth: 0 },
+        data: [
+          { name: '浏览', value: f.view_uv,  itemStyle: { color: C.cyan } },
+          { name: '加购', value: f.cart_uv,  itemStyle: { color: C.blue } },
+          { name: '下单', value: f.order_uv, itemStyle: { color: C.purple } },
+          { name: '支付', value: f.pay_uv,   itemStyle: { color: C.amber } }
+        ]
+      }]
+    });
+    charts.push(el);
+  }
+
+  /* 2. 用户转化趋势（按天，四条线） */
+  if (funnel.length) {
+    var dts = funnel.map(function (r) { return r.dt; });
+    function line(name, key, color) {
+      return {
+        name: name, type: 'line', smooth: true, symbolSize: 6,
+        lineStyle: { width: 2.4, color: color },
+        itemStyle: { color: color },
+        areaStyle: { opacity: .06, color: color },
+        data: funnel.map(function (r) { return r[key]; })
+      };
+    }
+    var el2 = echarts.init(document.getElementById('c-trend'));
+    el2.setOption({
+      tooltip: Object.assign({ trigger: 'axis' }, tip),
+      legend: Object.assign({ data: ['浏览', '加购', '下单', '支付'] }, legendBase),
+      grid: gridBase,
+      xAxis: { type: 'category', data: dts, axisLabel: axisLabel, axisLine: { lineStyle: { color: C.line } } },
+      yAxis: { type: 'value', axisLabel: axisLabel, splitLine: splitLine },
+      series: [
+        line('浏览', 'view_uv', C.cyan),
+        line('加购', 'cart_uv', C.blue),
+        line('下单', 'order_uv', C.purple),
+        line('支付', 'pay_uv', C.amber)
+      ]
+    });
+    charts.push(el2);
+  }
+
+  /* 3. 热销商品 TOP15（横向柱状） */
+  if (sku.length) {
+    var rows = sku.slice().sort(function (a, b) { return b.gmv - a.gmv; });
+    var el3 = echarts.init(document.getElementById('c-sku'));
+    el3.setOption({
+      tooltip: Object.assign({
+        trigger: 'axis', axisPointer: { type: 'shadow' },
+        formatter: function (p) {
+          var r = rows[p[0].dataIndex];
+          return r.sku_name + '<br/>支付金额：¥' + Number(r.gmv).toLocaleString('zh-CN') +
+                 '<br/>支付件数：' + r.pay_cnt + '<br/>类目：' + r.category_id;
+        }
+      }, tip),
+      grid: { left: 8, right: 62, top: 12, bottom: 8, containLabel: true },
+      xAxis: { type: 'value', axisLabel: Object.assign({}, axisLabel,
+               { formatter: function (v) { return (v / 1e4).toFixed(0) + '万'; } }),
+               splitLine: splitLine },
+      yAxis: { type: 'category', inverse: true,
+               data: rows.map(function (r) { return r.sku_name; }),
+               axisLabel: Object.assign({}, axisLabel, { fontSize: 11 }),
+               axisLine: { lineStyle: { color: C.line } } },
+      series: [{
+        type: 'bar', barWidth: '62%',
+        label: { show: true, position: 'right', color: C.muted, fontSize: 11,
+                 formatter: function (p) { return (p.value / 1e4).toFixed(1) + '万'; } },
+        itemStyle: {
+          borderRadius: [0, 3, 3, 0],
+          color: new echarts.graphic.LinearGradient(0, 0, 1, 0,
+            [{ offset: 0, color: '#0b6ba8' }, { offset: 1, color: C.cyan }])
+        },
+        data: rows.map(function (r) { return Number(r.gmv); })
+      }]
+    });
+    charts.push(el3);
+  }
+
+  /* 4. 订单金额趋势（订单总额 vs 支付金额） */
+  if (ord.length) {
+    var odts = ord.map(function (r) { return r.dt; });
+    var el4 = echarts.init(document.getElementById('c-gmv'));
+    el4.setOption({
+      tooltip: Object.assign({
+        trigger: 'axis',
+        formatter: function (ps) {
+          var s = ps[0].axisValue + '<br/>';
+          ps.forEach(function (p) {
+            s += p.marker + p.seriesName + '：¥' + Number(p.value).toLocaleString('zh-CN') + '<br/>';
+          });
+          return s;
+        }
+      }, tip),
+      legend: Object.assign({ data: ['订单总额', '支付金额'] }, legendBase),
+      grid: gridBase,
+      xAxis: { type: 'category', data: odts, axisLabel: axisLabel, axisLine: { lineStyle: { color: C.line } } },
+      yAxis: { type: 'value', axisLabel: Object.assign({}, axisLabel,
+               { formatter: function (v) { return (v / 1e8).toFixed(1) + '亿'; } }), splitLine: splitLine },
+      series: [
+        { name: '订单总额', type: 'line', smooth: true, symbolSize: 6,
+          lineStyle: { width: 2.4, color: C.purple }, itemStyle: { color: C.purple },
+          areaStyle: { opacity: .07, color: C.purple },
+          data: ord.map(function (r) { return Number(r.total_amount); }) },
+        { name: '支付金额', type: 'line', smooth: true, symbolSize: 6,
+          lineStyle: { width: 2.4, color: C.cyan }, itemStyle: { color: C.cyan },
+          areaStyle: { opacity: .10, color: C.cyan },
+          data: ord.map(function (r) { return Number(r.paid_amount); }) }
+      ]
+    });
+    charts.push(el4);
+  }
+
+  /* 5. 订单状态构成（堆叠柱） */
+  if (ord.length) {
+    var sdts = ord.map(function (r) { return r.dt; });
+    function bar(name, key, color, stack) {
+      return { name: name, type: 'bar', stack: stack, barWidth: '42%',
+               itemStyle: { color: color, borderRadius: [0, 0, 0, 0] },
+               data: ord.map(function (r) { return Number(r[key]); }) };
+    }
+    var el5 = echarts.init(document.getElementById('c-status'));
+    el5.setOption({
+      tooltip: Object.assign({ trigger: 'axis', axisPointer: { type: 'shadow' } }, tip),
+      legend: Object.assign({ data: ['已支付', '已取消', '已退款'] }, legendBase),
+      grid: { left: 58, right: 22, top: 42, bottom: 30 },
+      xAxis: { type: 'category', data: sdts, axisLabel: axisLabel, axisLine: { lineStyle: { color: C.line } } },
+      yAxis: { type: 'value', axisLabel: axisLabel, splitLine: splitLine },
+      series: [
+        bar('已支付', 'paid_orders', C.cyan, 'o'),
+        bar('已取消', 'cancelled_orders', C.amber, 'o'),
+        bar('已退款', 'refunded_orders', C.pink, 'o')
+      ]
+    });
+    charts.push(el5);
+  }
+
+  window.addEventListener('resize', function () {
+    charts.forEach(function (c) { c.resize(); });
+  });
+})();
+</script>
+</body>
+</html>
