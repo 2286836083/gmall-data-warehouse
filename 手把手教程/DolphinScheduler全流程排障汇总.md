@@ -20,7 +20,7 @@
 | 7 | **PowerShell 转义陷阱** | `CLIXML` 报错、`unexpected EOF`、命令被截断 | PS 会吞掉反引号/`$((...))`/双引号 | 复杂脚本写成 `.sh` 文件 scp 上传后执行 |
 | 8 | PATH 被覆盖导致命令找不到 | `jps: command not found`、`/bin/yarn: No such file` | `export PATH=$JAVA_HOME/bin:$PATH` 在非交互 shell 里 `$PATH` 为空 | 显式写全 PATH |
 | 9 | 本机 12345 隧道失效 | Python 报 `WinError 10061 目标计算机积极拒绝` | 隧道进程随观察脚本一起退出 | 改为直连 `192.168.87.131:12345` |
-| 10 | SSH 免密登录失败 | `Permission denied (publickey,password)` | 未指定密钥文件 | `ssh -i VMware/sshkeys/db_ed25519` |
+| 10 | SSH 免密登录失败 | `Permission denied (publickey,password)` | 未指定密钥文件 | `ssh -i D:\数据开发环境\VMware\sshkeys\cluster_ed25519` |
 | 11 | VM 里没有 curl | 探活脚本报 `command not found` | 最小化安装未带 curl | 用 Python `urllib` / `ss -ltn` 替代 |
 | 12 | beeline SQL 引号被吞 | `syntax error near unexpected token '('` | 经 PS → ssh 两层传递后 SQL 里的引号丢失 | SQL 写进 `.sql` 文件，用 `beeline -f` 执行 |
 | 13 | PowerShell 调 DS 接口 401 | 登录返回 `code=0`，后续请求仍 401 | `WebRequestSession` 未正确携带 `sessionId` Cookie | 改用 Python `http.cookiejar` 保持会话 |
@@ -429,11 +429,11 @@ printf 'ls /dolphinscheduler/nodes/worker\nquit\n' \
 
 ```powershell
 # 远程执行命令（必须带 -i 密钥，否则 Permission denied）
-ssh -n -i VMware/sshkeys/db_ed25519 -o BatchMode=yes `
+ssh -n -i D:\数据开发环境\VMware\sshkeys\cluster_ed25519 -o BatchMode=yes `
     -o StrictHostKeyChecking=no lrh@192.168.87.131 "<远程命令>"
 
 # 上传脚本
-scp -i VMware/sshkeys/db_ed25519 tmp_x.sh lrh@192.168.87.131:/home/lrh/workspace/
+scp -i D:\数据开发环境\VMware\sshkeys\cluster_ed25519 tmp_x.sh lrh@192.168.87.131:/home/lrh/workspace/
 ```
 
 ---
@@ -786,11 +786,11 @@ lrh@192.168.87.131: Permission denied (publickey,password).
 **解决**
 
 ```powershell
-ssh -n -i VMware/sshkeys/db_ed25519 -o BatchMode=yes `
+ssh -n -i D:\数据开发环境\VMware\sshkeys\cluster_ed25519 -o BatchMode=yes `
     -o StrictHostKeyChecking=no lrh@192.168.87.131 "<命令>"
 ```
 
-- 密钥位置：`VMware/sshkeys/db_ed25519`（生成脚本 `VMware/scripts/gen_key.ps1`）
+- 密钥位置：`D:\数据开发环境\VMware\sshkeys\cluster_ed25519`（生成脚本 `VMware/scripts/gen_key.ps1`）
 - 加 `-n` 可避免 ssh 占用 stdin 导致管道脚本挂住
 - `BatchMode=yes` 让认证失败立刻返回错误，而不是卡在密码提示
 
@@ -831,9 +831,9 @@ SQL 经过 PowerShell → ssh → bash 三层传递，引号被逐层剥离。
 ```powershell
 # 1) 本地写好 SQL 文件
 # 2) 上传
-scp -i VMware/sshkeys/db_ed25519 tmp_final_check.sql lrh@192.168.87.131:/home/lrh/workspace/
+scp -i D:\数据开发环境\VMware\sshkeys\cluster_ed25519 tmp_final_check.sql lrh@192.168.87.131:/home/lrh/workspace/
 # 3) 远端执行
-ssh -n -i VMware/sshkeys/db_ed25519 lrh@192.168.87.131 "export PATH=...; beeline -u jdbc:hive2://localhost:10000 --silent=true -f /home/lrh/workspace/tmp_final_check.sql"
+ssh -n -i D:\数据开发环境\VMware\sshkeys\cluster_ed25519 lrh@192.168.87.131 "export PATH=...; beeline -u jdbc:hive2://localhost:10000 --silent=true -f /home/lrh/workspace/tmp_final_check.sql"
 ```
 
 ---
