@@ -117,10 +117,10 @@ lrh-1 已经通过 `/etc/profile.d/` 配好了登录环境，**登录 shell 里�
 
 SSH 私钥在 `D:\数据开发环境\VMware\sshkeys\cluster_ed25519`（**在项目目录之外**——2026-10-20 已把私钥移出项目，避免误入 git 仓库），**必须带** **`-i`** **指定，否则报** **`Permission denied`**（问题 10）。
 
-命令里请用**绝对路径**。若在别的目录用相对路径，会报下面这种错（`VMware/sshkeys/db_ed25519` 是迁移前的旧位置，现已不存在）：
+命令里请用**绝对路径**。若在别的目录用相对路径，会报下面这种错（示例里的路径是迁移前的旧位置，现已不存在）：
 
 ```
-Warning: Identity file VMware/sshkeys/db_ed25519 not accessible: No such file or directory.
+Warning: Identity file <旧目录>/db_ed25519 not accessible: No such file or directory.
 lrh@192.168.87.131: Permission denied (publickey,password).
 ```
 
@@ -136,7 +136,7 @@ cd "D:\数据开发"
 ### 2.2 登录 lrh-1
 
 ```powershell
-ssh -i VMware/sshkeys/db_ed25519 -o StrictHostKeyChecking=no lrh@192.168.87.131
+ssh -i D:\数据开发环境\VMware\sshkeys\cluster_ed25519 -o StrictHostKeyChecking=no lrh@192.168.87.131
 ```
 
 看到这样的提示符就说明登录成功了：
@@ -892,7 +892,7 @@ hdfs dfs -ls -R /user/hive/warehouse/gmall.db | head -50
 | 7  | 脚本里的 SQL 报语法错误                  | SQL 写文件 → `beeline -f`，别在命令行里拼                            |
 | 8  | `beeline: command not found`    | beeline 不在 PATH（连登录 shell 也没有），用 `/opt/hive/apache-hive-3.1.3-bin/bin/beeline` |
 | 9  | 本机 12345 隧道打不开                  | 别开隧道，直连 `192.168.87.131:12345`                           |
-| 10 | `Permission denied (publickey)` | Windows 侧 ssh 要带 `-i VMware/sshkeys/db_ed25519`            |
+| 10 | `Permission denied (publickey)` | Windows 侧 ssh 要带 `-i D:\数据开发环境\VMware\sshkeys\cluster_ed25519`            |
 | 11 | 虚拟机里 `curl: command not found`  | 最小化安装没 curl，改用 `ss -ltn` / `yarn application -list`       |
 | 12 | beeline 内联 SQL 引号被吞             | 同 #7，改成 `-f` 文件方式                                        |
 | 13 | 用 PowerShell 调 DS 接口登录成功仍 401    | `WebRequestSession` 不传 Cookie，改用 Python `http.cookiejar` |
@@ -985,23 +985,23 @@ cd "D:\数据开发"
 # 1) 基础服务
 #    zookeeper：三台各自启
 foreach ($ip in "192.168.87.131","192.168.87.130","192.168.87.132") {
-  ssh -n -i VMware/sshkeys/db_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=no lrh@$ip "sudo systemctl start zookeeper"
+  ssh -n -i D:\数据开发环境\VMware\sshkeys\cluster_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=no lrh@$ip "sudo systemctl start zookeeper"
 }
 #    hadoop：只在 lrh-1 启（它会 ssh 拉起 lrh-2/lrh-3 的 DataNode/NodeManager）
-ssh -n -i VMware/sshkeys/db_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=no lrh@192.168.87.131 "sudo systemctl start hadoop mysql hive-metastore hive-server2"
+ssh -n -i D:\数据开发环境\VMware\sshkeys\cluster_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=no lrh@192.168.87.131 "sudo systemctl start hadoop mysql hive-metastore hive-server2"
 
 # 2) DolphinScheduler
-ssh -n -i VMware/sshkeys/db_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=no lrh@192.168.87.131 "export JAVA_HOME=/opt/jdk/jdk1.8.0_202; export PATH=/opt/jdk/jdk1.8.0_202/bin:/usr/bin:/bin; /home/lrh/dolphinscheduler/apache-dolphinscheduler-3.1.8-bin/bin/dolphinscheduler-daemon.sh start api-server; sleep 20; /home/lrh/dolphinscheduler/apache-dolphinscheduler-3.1.8-bin/bin/dolphinscheduler-daemon.sh start master-server"
+ssh -n -i D:\数据开发环境\VMware\sshkeys\cluster_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=no lrh@192.168.87.131 "export JAVA_HOME=/opt/jdk/jdk1.8.0_202; export PATH=/opt/jdk/jdk1.8.0_202/bin:/usr/bin:/bin; /home/lrh/dolphinscheduler/apache-dolphinscheduler-3.1.8-bin/bin/dolphinscheduler-daemon.sh start api-server; sleep 20; /home/lrh/dolphinscheduler/apache-dolphinscheduler-3.1.8-bin/bin/dolphinscheduler-daemon.sh start master-server"
 foreach ($ip in "192.168.87.130","192.168.87.132") {
-  ssh -n -i VMware/sshkeys/db_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=no lrh@$ip "export JAVA_HOME=/opt/jdk/jdk1.8.0_202; export PATH=/opt/jdk/jdk1.8.0_202/bin:/usr/bin:/bin; /home/lrh/dolphinscheduler/apache-dolphinscheduler-3.1.8-bin/bin/dolphinscheduler-daemon.sh start worker-server"
+  ssh -n -i D:\数据开发环境\VMware\sshkeys\cluster_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=no lrh@$ip "export JAVA_HOME=/opt/jdk/jdk1.8.0_202; export PATH=/opt/jdk/jdk1.8.0_202/bin:/usr/bin:/bin; /home/lrh/dolphinscheduler/apache-dolphinscheduler-3.1.8-bin/bin/dolphinscheduler-daemon.sh start worker-server"
 }
 
 # 3) 路径 A：一键跑批（约 40 分钟）
 #    先归档旧日志，否则 tail 会立刻看到上次的 ALL_DONE
-ssh -n -i VMware/sshkeys/db_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=no lrh@192.168.87.131 "cd /home/lrh/workspace/old_chain && mv -f log/pipeline.out log/pipeline.out.bak 2>/dev/null; setsid nohup bash run_pipeline.sh </dev/null >/dev/null 2>&1 & echo started"
+ssh -n -i D:\数据开发环境\VMware\sshkeys\cluster_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=no lrh@192.168.87.131 "cd /home/lrh/workspace/old_chain && mv -f log/pipeline.out log/pipeline.out.bak 2>/dev/null; setsid nohup bash run_pipeline.sh </dev/null >/dev/null 2>&1 & echo started"
 
 # 4) 看进度
-ssh -n -i VMware/sshkeys/db_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=no lrh@192.168.87.131 "tail -20 /home/lrh/workspace/old_chain/log/pipeline.out"
+ssh -n -i D:\数据开发环境\VMware\sshkeys\cluster_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=no lrh@192.168.87.131 "tail -20 /home/lrh/workspace/old_chain/log/pipeline.out"
 ```
 
 > ⚠️ 这种写法下有**三个**必须注意的点（否则会报错或静默出错）：
