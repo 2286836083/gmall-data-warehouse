@@ -8,7 +8,6 @@
 *.py     text eol=lf
 *.sql    text eol=lf
 *.md     text eol=lf
-*.txt    text eol=lf
 *.json   text eol=lf
 *.html   text eol=lf
 *.js     text eol=lf
@@ -17,6 +16,13 @@
 *.yaml   text eol=lf
 *.conf   text eol=lf
 *.ps1    text eol=crlf
+
+# ⚠️ 证据快照：字节必须原样，禁止任何换行符转换
+# 理由：mock/ 下的 .sql 参与过 md5 对账（7/7 与集群一致），
+#       .txt 是查询结果快照。一旦被转成 LF，md5 全变，对账依据失效。
+#       而且这些文件不上 Linux 执行，没理由转换。
+*.txt    -text
+mock/**  -text
 
 # 二进制文件，不做任何换行符转换
 *.zip    binary
