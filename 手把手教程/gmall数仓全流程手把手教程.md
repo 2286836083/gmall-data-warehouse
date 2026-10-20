@@ -115,9 +115,9 @@ lrh-1 已经通过 `/etc/profile.d/` 配好了登录环境，**登录 shell 里�
 
 ### 2.1 在 Windows 上：先切到项目根目录
 
-本仓库的 SSH 私钥在 `VMware/sshkeys/db_ed25519`，**必须带** **`-i`** **指定，否则报** **`Permission denied`**（问题 10）。
+SSH 私钥在 `D:\数据开发环境\VMware\sshkeys\cluster_ed25519`（**在项目目录之外**——2026-10-20 已把私钥移出项目，避免误入 git 仓库），**必须带** **`-i`** **指定，否则报** **`Permission denied`**（问题 10）。
 
-命令里的 `-i VMware/sshkeys/db_ed25519` 是**相对路径**。如果你在别的目录（比如 `C:\Users\lz>`）直接执行，会报：
+命令里请用**绝对路径**。若在别的目录用相对路径，会报下面这种错（`VMware/sshkeys/db_ed25519` 是迁移前的旧位置，现已不存在）：
 
 ```
 Warning: Identity file VMware/sshkeys/db_ed25519 not accessible: No such file or directory.
