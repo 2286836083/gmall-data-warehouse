@@ -243,7 +243,7 @@ LIVE = {
         # 屏幕上和简历的 57,575,996.50 对不上。format_number 返回字符串，输出即最终形态。
         "sql": "SELECT format_number(SUM(gmv), 2) AS gmv, SUM(order_cnt) AS orders "
                "FROM gmall.ads_trade_day",
-        "expect": "约 34 秒 · 应为 57,575,996.50 / 186059",
+        "expect": "约 21 秒（刚开机首次 34 秒）· 应为 57,575,996.50 / 186059",
         "timeout": 120,
         "proof": "指标能当场复算，且和简历上的数字一致",
     },
@@ -267,7 +267,7 @@ LIVE = {
         "label": "ODS 总行数",
         "kind": "hive",
         "sql": "SELECT COUNT(*) AS cnt FROM gmall.ods_event_log_di",
-        "expect": "20~60 秒 · 应为 10630245",
+        "expect": "约 28 秒（全表 count，建议最后点）· 应为 10630245",
         "timeout": 240,
         "proof": "最硬的一条：数据量能不能对上",
     },
