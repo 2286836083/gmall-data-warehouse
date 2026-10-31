@@ -66,10 +66,26 @@ PORTS = [
     (12345, "DS API"),
 ]
 
+# 演示可选件：DolphinScheduler 不随开机自启，没启动是常态而非故障。
+# 这类端口不作为"集群健康"的判据，避免把"没点开 DS"误读成"连接坏了"。
+OPTIONAL_PORTS = {12345}
+
+# known_hosts 固定到本目录：默认位置（~/.ssh）可能不存在或不可写，
+# OpenSSH 每次会往 stderr 打一行 "Failed to add the host to the list of known hosts"，
+# 而 stderr 会被合并进页面输出，看起来像"连接出错"。
+KNOWN_HOSTS = os.path.join(DATA, "_known_hosts")
+try:
+    os.makedirs(DATA, exist_ok=True)
+    open(KNOWN_HOSTS, "a").close()
+except Exception:  # noqa: BLE001
+    pass
+
 SSH_OPTS = [
     "-o", "BatchMode=yes",
     "-o", "ConnectTimeout=6",
     "-o", "StrictHostKeyChecking=no",
+    "-o", "UserKnownHostsFile=" + KNOWN_HOSTS,
+    "-o", "LogLevel=ERROR",
     "-o", "ServerAliveInterval=15",
 ]
 
@@ -142,13 +158,20 @@ def parse_health(text):
             ports[int(m.group(1))] = m.group(2) == "UP"
 
     up = sum(1 for v in ports.values() if v)
+    core_up = sum(1 for p, _ in PORTS if p not in OPTIONAL_PORTS and ports.get(p, False))
     return {
         "ok": True,
         "hostname": (sec.get("HOST") or ["?"])[0],
         "uptime": (sec.get("UPTIME") or ["?"])[0],
-        "ports": [{"port": p, "name": n, "up": ports.get(p, False)} for p, n in PORTS],
+        "ports": [{"port": p, "name": n, "up": ports.get(p, False),
+                   "optional": p in OPTIONAL_PORTS} for p, n in PORTS],
         "ports_up": up,
         "ports_total": len(PORTS),
+        # 核心端口 = 非可选。分开统计，避免「DS 没启」被读成「集群坏了」：
+        # Hadoop 全家桶起不来才是真故障，DS 是演示可选件，本来就不随开机自启。
+        "core_up": core_up,
+        "core_total": len([p for p, _ in PORTS if p not in OPTIONAL_PORTS]),
+        "optional_down": [n for p, n in PORTS if p in OPTIONAL_PORTS and not ports.get(p, False)],
         "jps": "".join(sec.get("JPS", [])).strip().strip(","),
         "mem": (sec.get("MEM") or [""])[0],
     }
@@ -187,9 +210,13 @@ def health(force=False):
 # ══════════════════════════════════════════════════════════════
 NOISE = re.compile(
     r"^(SLF4J|log4j|WARN|INFO|Beeline version|Connecting to|Connected to|"
-    r"Transaction isolation|Closing:|No rows selected|0: jdbc|Error: CompileError)",
+    r"Transaction isolation|Closing:|Failed to add the host|"
+    r"No rows selected|0: jdbc)",
     re.I,
 )
+# ★ 曾经这里还过滤了 "Error: CompileError"，已删除：
+#   把错误行当噪声滤掉，SQL 编译失败时页面只会显示"无输出"，
+#   真实原因被自己屏蔽 —— 宁可显示难看的报错，也不能显示空白。
 
 LIVE = {
     "hdfs_count": {
@@ -211,8 +238,12 @@ LIVE = {
     "gmv": {
         "label": "全月 GMV 与成交笔数",
         "kind": "hive",
-        "sql": "SELECT SUM(gmv) AS gmv, SUM(order_cnt) AS orders FROM gmall.ads_trade_day",
-        "expect": "约 10 秒 · 应为 57575996.5 / 186059",
+        # 必须用 format_number 而不是 ROUND：gmv 是 DOUBLE，
+        # ROUND(SUM(gmv),2) 经 tsv2 输出仍是科学计数法（实测 5.75759965E7），
+        # 屏幕上和简历的 57,575,996.50 对不上。format_number 返回字符串，输出即最终形态。
+        "sql": "SELECT format_number(SUM(gmv), 2) AS gmv, SUM(order_cnt) AS orders "
+               "FROM gmall.ads_trade_day",
+        "expect": "约 34 秒 · 应为 57,575,996.50 / 186059",
         "timeout": 120,
         "proof": "指标能当场复算，且和简历上的数字一致",
     },
@@ -235,7 +266,7 @@ LIVE = {
     "count_ods": {
         "label": "ODS 总行数",
         "kind": "hive",
-        "sql": "SELECT COUNT(*) AS rows FROM gmall.ods_event_log_di",
+        "sql": "SELECT COUNT(*) AS cnt FROM gmall.ods_event_log_di",
         "expect": "20~60 秒 · 应为 10630245",
         "timeout": 240,
         "proof": "最硬的一条：数据量能不能对上",

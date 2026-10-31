@@ -117,6 +117,8 @@
   .port.up .st{color:var(--ok)}
   .port.dn{border-color:#f0d5d2;background:#fdf6f5}
   .port.dn .st{color:var(--bad)}
+  .port.opt{border-color:#e6e1d6;background:#fbfaf4}
+  .port.opt .st{color:var(--dim)}
   .port .st{font-size:12px}
 
   .qcard{border:1px solid var(--line);border-radius:10px;padding:13px 15px;background:#fff;margin-bottom:10px}
@@ -412,9 +414,13 @@ function renderLive(){
 
 function portHtml(h){
   return h.ports.map(function(p){
-    return '<div class="port '+(p.up?'up':'dn')+'"><div class="p">'+p.port+'</div>'
+    // 可选件（DS）没启动是常态，用中性样式 + "未启动"，不用红色，
+    // 否则一眼看过去像集群连不上。
+    var cls = p.up ? "up" : (p.optional ? "opt" : "dn");
+    var st  = p.up ? "监听中" : (p.optional ? "未启动（演示非必需）" : "未监听");
+    return '<div class="port '+cls+'"><div class="p">'+p.port+'</div>'
       + '<div class="nm">'+esc(p.name)+'</div>'
-      + '<div class="st">'+(p.up?'监听中':'未监听')+'</div></div>';
+      + '<div class="st">'+st+'</div></div>';
   }).join("");
 }
 
@@ -433,7 +439,12 @@ function renderHealth(){
   }
 
   pill.className = "pill ok";
-  pill.textContent = "集群在线 · 端口 " + HEALTH.ports_up + "/" + HEALTH.ports_total;
+  var coreTxt = "集群在线 · 核心 " + (HEALTH.core_up != null ? HEALTH.core_up : HEALTH.ports_up)
+              + "/" + (HEALTH.core_total != null ? HEALTH.core_total : HEALTH.ports_total);
+  if(HEALTH.optional_down && HEALTH.optional_down.length){
+    coreTxt += " · " + HEALTH.optional_down.join("/") + " 未启动";
+  }
+  pill.textContent = coreTxt;
 
   var memTxt = "";
   if(HEALTH.mem){
@@ -445,7 +456,13 @@ function renderHealth(){
   box.innerHTML =
     '<table><tr><th style="width:110px">主机</th><td class="mono">'+esc(HEALTH.hostname)+'</td>'
     + '<th style="width:80px">运行</th><td>'+esc(HEALTH.uptime)+'</td></tr>'
-    + '<tr><th>端口</th><td colspan="3">'+HEALTH.ports_up+' / '+HEALTH.ports_total+' 在监听</td></tr>'
+    + '<tr><th>端口</th><td colspan="3">核心 '
+      + (HEALTH.core_up != null ? HEALTH.core_up : HEALTH.ports_up) + ' / '
+      + (HEALTH.core_total != null ? HEALTH.core_total : HEALTH.ports_total) + ' 在监听'
+      + (HEALTH.optional_down && HEALTH.optional_down.length
+          ? '　<span style="color:var(--dim)">（' + esc(HEALTH.optional_down.join("、")) + ' 未启动，不影响演示）</span>'
+          : '')
+      + '</td></tr>'
     + '<tr><th>进程</th><td colspan="3" class="mono" style="font-size:12.5px">'+esc(HEALTH.jps||"（jps 无输出）")+'</td></tr>'
     + (memTxt?'<tr><th>内存</th><td colspan="3">'+memTxt+'</td></tr>':'')
     + '<tr><th>探测耗时</th><td colspan="3">'+HEALTH.elapsed+' 秒</td></tr>'
