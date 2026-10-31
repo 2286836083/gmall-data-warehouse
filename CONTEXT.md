@@ -179,7 +179,9 @@ DS          /home/lrh/dolphinscheduler/apache-dolphinscheduler-3.1.8-bin
 ### 命令与调试
 
 7. **中文不要塞进 `ssh` 命令行**（Git Bash 按本地代码页编码会破坏参数 → 静默返回空）。**只有输入方向坏、输出正常**，极易误判为远端故障。同理**中文路径不要作为命令行参数传给 Windows 程序**（`python -m py_compile "D:\中文路径\x.py"` 会报"文件不存在"）。用 `scp` / heredoc / 脚本内部构造路径
-8. **`rows` 是 Hive 保留字**，作别名会让语句解析失败；stderr 被丢时表现为**静默返回空**，会被误判成"数据丢了"。用 `row_cnt`
+8. **`rows` 是 Hive 保留字**，作别名会让语句解析失败；stderr 被丢时表现为**静默返回空**，会被误判成"数据丢了"。用 `row_cnt` / `cnt`
+   - 实测报错原文（2026-10-31，Hive 3.1.3）：`ParseException line 1:19 cannot recognize input near 'AS' 'rows' 'FROM' in selection target (state=42000,code=40000)`
+   - ⚠️ **这条已被踩第二次**：写演示台时 `SELECT COUNT(*) AS rows` 又中招，用户看到报错以为是"连接坏了"。而本条当时就写着会发生这种误判 —— **靠记忆防坑不管用，写 SQL 前应该 `grep` 一遍本节**
 9. **非交互 SSH 里裸写 `yarn` 会 command not found**，加 `2>/dev/null` 就变成"看起来合法的空答案"。**一律用全路径**
 10. **`beeline --outputformat=json` 不可用**（合法值只有 `table/vertical/csv2/tsv2/dsv/csv/tsv`）→ 用 `csv2` + Python 转 JSON
 11. **用 `mysql` 客户端必须加 `--default-character-set=utf8mb4`**
