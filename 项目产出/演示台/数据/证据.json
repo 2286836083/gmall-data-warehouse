@@ -1,0 +1,258 @@
+{
+  "meta": {
+    "updated": "2026-10-31",
+    "note": "本文件是演示台的唯一数据源。所有数字均为项目实测值；未实测的关系不作断言。",
+    "sources": [
+      "README.md",
+      "项目产出/数仓表清单与业务问题映射.md",
+      "实验分析/实验10_Spark双引擎对比.md",
+      "实验分析/实验12_Spark接入DolphinScheduler.md",
+      "项目产出/数据接入/ods_event_log_ddl.sql"
+    ]
+  },
+
+  "project": {
+    "name": "gmall 电商离线数仓",
+    "role": "数据开发 · 个人独立项目",
+    "period": "2026.08 – 2026.10",
+    "oneline": "基于 REES46 真实电商行为数据（1,063 万行 / 31 天）的离线数仓，ODS → DWD/DIM → DWS → ADS 全链路自建。",
+    "subline": "不是跑通一个 demo：在这套三节点受限集群上，每个结论都跑到能拿数据说话 —— 包括失败、被证伪的假设、和改了参数反而更慢的实测结果。",
+    "repo": "github.com/2286836083/gmall-data-warehouse"
+  },
+
+  "kpis": [
+    { "label": "源数据", "value": "10,630,245", "unit": "行", "note": "42,448,764 行按用户 1/4 可复现采样（25.04%）" },
+    { "label": "时间跨度", "value": "31", "unit": "天", "note": "2019-10-01 ~ 2019-10-31，31 个分区" },
+    { "label": "表规模", "value": "30", "unit": "张", "note": "新链路 15 + 旧链路 15 对照组" },
+    { "label": "全月 GMV", "value": "57,575,996.50", "unit": "", "note": "8 条独立计算路径收敛到同一值" },
+    { "label": "成交笔数", "value": "186,059", "unit": "笔", "note": "dwd_purchase_fact_di 一行一笔成交" },
+    { "label": "Hive 链耗时", "value": "54", "unit": "分 10 秒", "note": "DolphinScheduler 16 节点，16/16 SUCCESS" },
+    { "label": "Spark 链耗时", "value": "14", "unit": "分 46 秒", "note": "11 节点，11/11 SUCCESS" },
+    { "label": "单会话提速", "value": "5.0", "unit": "×", "note": "Spark 75s vs Hive 389s（八段连跑）" },
+    { "label": "分段提速", "value": "1.10", "unit": "×", "note": "Spark 381s vs Hive 421s（每段各起会话）—— 收益来自会话复用" }
+  ],
+
+  "layers": [
+    {
+      "level": "ODS",
+      "name": "贴源层",
+      "purpose": "原样落地，不做加工",
+      "tables": [
+        { "t": "ods_event_log_di", "g": "一行一条事件", "rows": "10,630,245", "extra": "31 分区 · 1.3 GB · 1 张表" }
+      ]
+    },
+    {
+      "level": "DWD",
+      "name": "明细层",
+      "purpose": "去重 / 解析时间 / 拆类目 / 归一空值",
+      "tables": [
+        { "t": "dwd_event_log_di", "g": "一行一条事件", "rows": "10,623,154", "extra": "ORC + SNAPPY" },
+        { "t": "dwd_purchase_fact_di", "g": "一行一笔成交", "rows": "186,059", "extra": "购买事实" }
+      ]
+    },
+    {
+      "level": "DIM",
+      "name": "维度层",
+      "purpose": "描述性属性，只存一份；必须足够小才能广播成 MapJoin",
+      "tables": [
+        { "t": "dim_product", "g": "一行一个商品", "rows": "140,665", "extra": "由事件流派生，不含价格" },
+        { "t": "dim_date", "g": "一行一天", "rows": "365", "extra": "静态预生成 2019 全年" }
+      ]
+    },
+    {
+      "level": "DWS",
+      "name": "汇总层",
+      "purpose": "先聚合再关联维表，避免大表 JOIN",
+      "tables": [
+        { "t": "dws_user_event_day", "g": "用户 × 天", "rows": "1,622,820", "extra": "行为次数 / 消费 / 会话数" },
+        { "t": "dws_product_event_day", "g": "商品 × 天", "rows": "1,265,817", "extra": "曾把 512MB 容器压爆的那张" },
+        { "t": "dws_category_event_day", "g": "类目 × 天", "rows": "1,853", "extra": "旧链路没有此主题" },
+        { "t": "dws_trade_day", "g": "天", "rows": "31", "extra": "交易大盘" }
+      ]
+    },
+    {
+      "level": "ADS",
+      "name": "应用层",
+      "purpose": "一表一业务问题，应用层只消费这一层",
+      "tables": [
+        { "t": "ads_active_user_day", "g": "天", "rows": "31", "extra": "Q1 活跃与新增" },
+        { "t": "ads_funnel_day", "g": "天", "rows": "31", "extra": "Q2 转化漏斗" },
+        { "t": "ads_repurchase_day", "g": "天", "rows": "31", "extra": "Q3 复购" },
+        { "t": "ads_top_product_day", "g": "天 × 排名", "rows": "1,550", "extra": "Q4 每日 Top50" },
+        { "t": "ads_category_day", "g": "一级类目 × 天", "rows": "434", "extra": "Q5 类目结构" },
+        { "t": "ads_trade_day", "g": "天", "rows": "31", "extra": "Q6 交易大盘" }
+      ]
+    }
+  ],
+
+  "ddl": {
+    "ods_event_log_di": "CREATE TABLE gmall.ods_event_log_di (\n  event_time    string  COMMENT '事件时间（原始文本，解析在 DWD 层做）',\n  event_type    string  COMMENT '事件类型：view / cart / purchase',\n  product_id    bigint  COMMENT '商品ID',\n  category_id   bigint  COMMENT '商品类目ID',\n  category_code string  COMMENT '类目路径，可用点拆 3 级；原数据约 31.9% 为空',\n  brand         string  COMMENT '品牌，原数据约 14.4% 为空',\n  price         double  COMMENT '价格；0 值仅出现在 view/cart，purchase 无 0 值',\n  user_id       bigint  COMMENT '用户ID',\n  user_session  string  COMMENT '会话ID'\n)\nCOMMENT 'ODS 原始层：按 dt 分区，原样接入不做加工'\nPARTITIONED BY (dt string)\nROW FORMAT DELIMITED FIELDS TERMINATED BY ','\nSTORED AS TEXTFILE;",
+    "dwd_purchase_fact_di": "CREATE TABLE gmall.dwd_purchase_fact_di (\n  order_id    string     COMMENT '订单ID（用购买事件的 event_id）',\n  user_id     bigint     COMMENT '用户ID',\n  product_id  bigint     COMMENT '商品ID',\n  category_l1 string     COMMENT '一级类目',\n  category_l2 string     COMMENT '二级类目',\n  category_l3 string     COMMENT '三级类目',\n  brand       string     COMMENT '品牌',\n  amount      double     COMMENT '成交金额（实测 purchase 无 0 值）',\n  pay_time    timestamp  COMMENT '支付时间',\n  is_paid     int        COMMENT '由 purchase 事件派生，恒为 1'\n)\nCOMMENT 'DWD 事实层：购买事实，一行一笔成交'\nPARTITIONED BY (dt string)\nSTORED AS ORC\nTBLPROPERTIES ('orc.compress' = 'SNAPPY');"
+  },
+
+  "stories": [
+    {
+      "id": "memory",
+      "title": "一次「看着像内存不足、其实是结构不对」的调优",
+      "oneshot": "同一个作业，512MB 容器跑了 637 秒失败，调到 1024MB 后 63 秒成功 —— 但真正的结论不是「加内存就好了」。",
+      "rows": [
+        { "k": "调整前", "v": "容器 512 MB / -Xmx410m → GC overhead limit exceeded，跑了 637 秒" },
+        { "k": "调整后", "v": "容器 1024 MB / -Xmx820m → 成功，63 秒" },
+        { "k": "触发结构", "v": "GROUP BY product_id, dt，理论上限 430 万组合（14 万商品 × 31 天）" },
+        { "k": "实际行数", "v": "1,265,817 行 —— 430 万是上限不是实测值，因为不是每个商品每天都出现" }
+      ],
+      "insight": "判断依据不是「这个作业数据量大不大」，而是「这个作业有没有需要同时装住大量中间结果的结构」。写入型作业边读边写，容器压小没事；大基数聚合必须放大。",
+      "boundary": "结论来自三节点、YARN 单容器上限 2048MB 的环境。如果容器能开到 8G，瓶颈会转移到磁盘 IO 或 shuffle 网络。",
+      "lesson": "一套配置统一压到最小看起来整洁，实际是把「按作业类型分层」的设计抹掉了。"
+    },
+    {
+      "id": "engine",
+      "title": "双引擎对比：Spark 的收益来自会话复用，不是单条 SQL 更快",
+      "oneshot": "同一个 SQL、同一套资源、同一时间窗口：单会话连跑八段快 5.0 倍，但每段各起一个会话只快 1.10 倍 —— 而且八段里有四段 Spark 反而更慢。",
+      "rows": [
+        { "k": "单会话连跑八段", "v": "Hive 389s / Spark 75s → 5.0×" },
+        { "k": "每段各起会话", "v": "Hive 421s / Spark 381s → 1.10×（最干净的同口径对比）" },
+        { "k": "调度下 A/B 组", "v": "Hive 1,099s / Spark 677s → 1.62×" },
+        { "k": "成本拆解", "v": "Spark 每段自报执行合计仅 101s，其余约 280s 是启动开销，约 35 秒/会话，占 73%" }
+      ],
+      "insight": "两个引擎的固定成本绑在不同的东西上：Spark 绑在「会话」，会话复用了就能省；Hive 每个 INSERT 都要起一个 MR 作业和 AM，绑在「作业」，复用 beeline 会话也消不掉。证据是不对称的：改单会话后 Spark 省 306 秒，Hive 只省 32 秒。",
+      "boundary": "n=1，只跑了一次；特定集群与资源上限。调度下 1.62× 比 1.10× 高，这个差异没有查明原因，只是推断。",
+      "lesson": "所以：多个作业应合并进一个常驻会话（Spark ThriftServer 的价值）；单条短查询不要用 Spark。"
+    },
+    {
+      "id": "bug",
+      "title": "一个「跑得对、显示全错」的生产级 bug",
+      "oneshot": "DolphinScheduler 画布上 16 个节点只剩 1 个，但工作流执行完全正常：16/16 SUCCESS、行数全对、指标全对。",
+      "rows": [
+        { "k": "现象", "v": "DAG 画布只显示 1 个节点，执行与数据全部正确" },
+        { "k": "根因", "v": "DS 把 task code 当 JSON 数字返回，浏览器用双精度浮点解析，只能精确到 2^53" },
+        { "k": "后果", "v": "超过 2^53 后多个不同 code 塌缩成同一个数，节点在图上被合并" },
+        { "k": "定位代价", "v": "猜错过一次；修完还回头查了历史遗留的同类数据" }
+      ],
+      "insight": "这个 bug 的特点是所有自动化测试都发现不了 —— 数据库里是 64 位整数，执行链路完全正确，只有人眼看画布才能发现。",
+      "boundary": "属于前端精度问题，不是调度逻辑问题；用字符串传 ID 即可规避。",
+      "lesson": "「测试全绿」不等于「系统正确」—— 显示层和计算层是两套正确性。"
+    }
+  ],
+
+  "engine": {
+    "note": "三个倍数口径不同，不能互相替代。面试时先说自己用的是哪个口径。",
+    "rows": [
+      { "way": "单会话连跑八段", "hive": "389 s", "spark": "75 s", "ratio": "5.0×", "usable": "口径不对等（引擎内部组织方式不同）" },
+      { "way": "每段各起会话", "hive": "421 s", "spark": "381 s", "ratio": "1.10×", "usable": "最干净的同口径对比" },
+      { "way": "调度下 A/B 组", "hive": "1,099 s", "spark": "677 s", "ratio": "1.62×", "usable": "有 DS 库真实时间戳" }
+    ]
+  },
+
+  "recon": {
+    "value": "57,575,996.50",
+    "count": 8,
+    "items": [
+      { "n": 1, "path": "交易维度", "sql": "sum(gmv) on gmall.dws_trade_day" },
+      { "n": 2, "path": "商品维度", "sql": "sum(gmv) on gmall.dws_product_event_day" },
+      { "n": 3, "path": "类目维度", "sql": "sum(gmv) on gmall.dws_category_event_day" },
+      { "n": 4, "path": "ADS 层", "sql": "sum(gmv) on gmall.ads_trade_day" },
+      { "n": 5, "path": "DWD 事实表", "sql": "sum(amount) on gmall.dwd_purchase_fact_di" },
+      { "n": 6, "path": "Spark 结果", "sql": "sum(gmv) on gmall_bench.dws_trade_day" },
+      { "n": 7, "path": "Spark 结果", "sql": "sum(gmv) on gmall_bench.dws_product_event_day" },
+      { "n": 8, "path": "Spark 结果", "sql": "sum(gmv) on gmall_bench.dws_category_event_day" }
+    ],
+    "note": "8 条路径、两个引擎、两个库，全部是 5.75759965E7。曾有一个 57,575,965.00 的记录（差 31.50），2026-10-18 回集群复核后确认是抄写错误，不是口径差异。"
+  },
+
+  "findings": [
+    {
+      "title": "漏斗不是三段递进，「加购」不是购买的前置环节",
+      "evidence": "实测 31 天里有 15 天「购买用户数 > 加购用户数」",
+      "conclusion": "用户可以完全不进购物车直接下单。cart_rate 与 cart_to_purchase_rate 是两个独立指标，不能相乘当漏斗。"
+    },
+    {
+      "title": "空值是空串，不是 NULL",
+      "evidence": "category_code 空串约 31.9%，而 IS NULL 查出 0 条",
+      "conclusion": "用 IS NULL 判空会得出「数据很干净」的错误结论 —— 这是最典型的假阴性。"
+    },
+    {
+      "title": "类目确实有脏数据",
+      "evidence": "category_l1 = 'unknown' 在 DWD 层被显式归一，未丢弃",
+      "conclusion": "丢弃会让总额对不上，所以单列展示。做类目分析必须显式处理。"
+    }
+  ],
+
+  "limits": [
+    { "k": "全量覆盖写入", "v": "每天全量重写，端到端约 54 分钟", "impact": "数据量再涨就顶不住，增量写入是下一步" },
+    { "k": "无实时链路", "v": "只有 T+1 离线", "impact": "不覆盖流式场景" },
+    { "k": "只覆盖 31 天", "v": "2019-10 单月", "impact": "做不了同环比与季节性" },
+    { "k": "集群资源受限", "v": "三节点 VM，YARN 单容器上限 2048 MB / 2 vCore", "impact": "做不了大规模压测，很多调优实验被卡死" },
+    { "k": "源数据无订单状态", "v": "只有 view / cart / purchase 三类事件", "impact": "已支付/已取消/已退款无法分析" },
+    { "k": "金额用 double", "v": "gmv 是 double 类型，应改 DECIMAL(18,2)", "impact": "已知未修：修了要重建表，属高危操作" }
+  ],
+
+  "stack": [
+    { "c": "Hadoop (HDFS + YARN)", "v": "3.3.6", "n": "三节点" },
+    { "c": "Hive", "v": "3.1.3", "n": "Metastore 用 MySQL 8" },
+    { "c": "Spark", "v": "3.5.9", "n": "-bin-hadoop3，JDK 8 支持的最后一条线" },
+    { "c": "DolphinScheduler", "v": "3.1.8", "n": "16 节点（Hive 链）+ 11 节点（Spark 链）" },
+    { "c": "ZooKeeper", "v": "3.8.7", "n": "" },
+    { "c": "JDK", "v": "1.8.0_202", "n": "" },
+    { "c": "OS", "v": "Ubuntu 24.04", "n": "三节点 VMware" }
+  ],
+
+  "qa": [
+    {
+      "kw": ["倾斜", "skew", "热点"],
+      "q": "数据倾斜怎么处理？",
+      "short": "先看 key 分布，再决定是过滤、拆分还是加随机前缀。",
+      "detail": "项目里典型倾斜源是 category_l1 = 'unknown'，它是把源数据缺失归一出来的伪 key，天然聚集。处理方式是单独分组或不参与类目对比，而不是丢进 GROUP BY 让它一个 key 吞掉大块数据。通用手段还有：join 侧把小表广播成 MapJoin、大 key 加随机前缀两阶段聚合、必要时单独拎出来跑。",
+      "src": "实验分析 / 项目产出/组件详解"
+    },
+    {
+      "kw": ["小文件", "文件数", "合并", "block"],
+      "q": "小文件问题怎么解决？",
+      "short": "分区粒度 × 并行度共同决定文件数，写完要合并。",
+      "detail": "ODS 是 31 个分区 31 个文件、1.3 GB，粒度还算健康。真正的风险在 DWS/ADS：reduce 数一多，每张表每个分区都会产出若干小文件，堆积起来既压 NameNode 也拖慢后续扫描。手段是控制 reduce 数、写之前 DISTRIBUTE BY 收敛、或者事后用 INSERT OVERWRITE 重写合并（Hive 的 merge 任务）。",
+      "src": "CONTEXT.md / Spark教程/06"
+    },
+    {
+      "kw": ["幂等", "重跑", "失败", "断点"],
+      "q": "任务失败重跑，怎么保证不重复写？",
+      "short": "靠分区级覆盖写：INSERT OVERWRITE 指定分区，重跑就是重算这一段。",
+      "detail": "全量链路每天重写整表，天然幂等。分区表用 INSERT OVERWRITE ... PARTITION(dt=...) 只覆盖当天，失败重跑不会叠加。这里有个坑：写动态分区必须显式 SET hive.exec.dynamic.partition.mode=nonstrict，否则报错；而 Spark 侧写分区表必须设 partitionOverwriteMode=dynamic，否则会先清空整表。",
+      "src": "CONTEXT.md 陷阱清单 / 实验10"
+    },
+    {
+      "kw": ["全量", "增量", "54 分钟", "为什么慢"],
+      "q": "全量跑 54 分钟，数据涨 100 倍怎么办？",
+      "short": "现在的设计就是全量覆盖，这是已知局限，下一步要做增量。",
+      "detail": "全量覆盖的好处是简单、天然幂等、口径不会漂；代价是每次都重算历史。涨 100 倍的直接后果是耗时线性上升、集群装不下。改造方向是分区级增量（只算 dt=昨天）、拉链表处理维度变化、以及换成支持 MERGE 的表格式（Iceberg/Hudi）做 upsert。这一步我还没做，是明确的下一步。",
+      "src": "README 第七节"
+    },
+    {
+      "kw": ["维表", "DIM", "mapjoin", "广播"],
+      "q": "DIM 层是干什么的？为什么它不在主链路上？",
+      "short": "存描述性属性，挂在旁边被查，不流向 ADS。",
+      "detail": "事实表只存 product_id 这样的 ID，属性（名称、类目、品牌）抽到维表只存一份，改一处全局一致。维表必须足够小才能被广播成 MapJoin，避免 shuffle —— 所以「维表小」是硬约束不是偏好。我项目里 dim_product 14 万行、dim_date 365 行。严格说 ODS→DWD→DIM→DWS→ADS 这个写法有误导，DIM 与 DWD 是平行的。",
+      "src": "项目产出/数仓表清单与业务问题映射.md"
+    },
+    {
+      "kw": ["spark", "hive", "快", "5 倍", "会话"],
+      "q": "Spark 比 Hive 快多少？",
+      "short": "取决于怎么调用：分段 1.10×，单会话 5.0×，调度下 1.62×。",
+      "detail": "单一倍数会误导。最干净的同口径对比是每段各起会话：381s vs 421s，只快 10%，八段里四段 Spark 反而更慢。改成单会话连跑八段才是 75s vs 389s。拆开看，Spark 每段自报执行只有 101s，其余约 280s 是启动开销（约 35 秒/次）。所以结论是：Spark 把成本从「每次作业」挪到了「每次会话」。",
+      "src": "实验分析/实验10、实验12"
+    },
+    {
+      "kw": ["gc", "内存", "oom", "调优", "xmx"],
+      "q": "为什么容器 512MB 不能设 -Xmx512m？",
+      "short": "堆外还要给元空间、线程栈、GC 结构留约 100MB。",
+      "detail": "JVM 的内存不止堆：Metaspace、每个线程的栈、直接内存、GC 自身的数据结构都要占。你把 -Xmx 顶到容器上限，故障就从「JVM 可控的 OOM（有明确报错）」变成「YARN 直接 kill 容器」—— 后者报错完全不指向内存设置，更难查。所以 512MB 容器配 410m 堆，1024MB 容器配 820m 堆，是留出约 20% 的余量。",
+      "src": "Java教程/01、02"
+    },
+    {
+      "kw": ["分层", "为什么分层", "ods", "dws", "ads"],
+      "q": "为什么要分四层？直接写一张宽表不行吗？",
+      "short": "分层是为了让每层的变更成本不一样。",
+      "detail": "ODS 原样存，出问题能回溯到原始数据；DWD 做一次清洗，所有下游共享，口径只改一处；DWS 按主题预聚合，把 1,063 万行压到百万级；ADS 一表一问题，直接对接展示。不分层的后果是：每个报表自己写一遍清洗逻辑，同一个「有效订单」在不同报表里定义不同，最后谁也不敢改。我的强制规范是应用层只消费 ADS，曾经违反过（大屏直读 DWS），后来补建 ADS 表修正。",
+      "src": "README 第二节"
+    }
+  ]
+}
